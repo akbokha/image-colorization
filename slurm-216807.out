@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "cnn_experimentation.py", line 4, in <module>
+    from skimage.color import lab2rgb, rgb2lab, rgb2gray
+ModuleNotFoundError: No module named 'skimage'
