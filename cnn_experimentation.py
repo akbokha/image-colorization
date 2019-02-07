@@ -1,5 +1,7 @@
 import os, shutil, time
+
 import numpy as np
+import matplotlib.pyplot as plt
 
 from skimage.color import lab2rgb, rgb2lab, rgb2gray
 from skimage import io
@@ -10,6 +12,8 @@ import torch.nn.functional as F
 
 import torchvision.models as models
 from torchvision import datasets, transforms
+
+from datetime import datetime
 
 use_gpu = torch.cuda.is_available()
 
@@ -102,6 +106,14 @@ def validate(val_loader, model, criterion, save_images, epoch):
 
 
 def train(train_loader, model, criterion, optimizer, epoch):
+    curr_time = str(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))
+    dir_name = './train/model_' + curr_time
+
+    if not os.path.isdir(dir_name):
+        os.makedirs(dir_name)
+
+    file_name = 'epoch_{}.txt'.format(epoch)
+
     print('Starting training epoch {}'.format(epoch))
     model.train()
 
@@ -133,12 +145,13 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # Print model accuracy -- in the code below, val refers to value, not validation
         if i % 25 == 0:
-            print('Epoch: [{0}][{1}/{2}]\t'
-                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                  'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
+            stats = (
+                'Epoch: [{0}][{1}/{2}]\tTime {batch_time.val:.3f} ({batch_time.avg:.3f})\tData {data_time.val:.3f} ({'
+                'data_time.avg:.3f})\tLoss {loss.val:.4f} ({loss.avg:.4f})\t').format(
                 epoch, i, len(train_loader), batch_time=batch_time,
-                data_time=data_time, loss=losses))
+                data_time=data_time, loss=losses)
+            print(stats)
+            write_results_to_file(dir_name, file_name, stats)
 
     print('Finished training epoch {}'.format(epoch))
 
@@ -198,6 +211,16 @@ class GrayscaleImageFolder(datasets.ImageFolder):
         return img_original, img_ab, target
 
 
+def write_results_to_file(file_dir, file_name, data):
+    file = open(file_dir + os.path.sep + file_name, 'a')
+    if isinstance(data, str):
+        file.write(data)
+    else:
+        for line in data:
+            file.write(line)
+    file.close()
+
+
 if __name__ == '__main__':
     model = ColorizationNet()
     # since we are doing regression between the color value we predict and the ground truth
@@ -237,5 +260,3 @@ if __name__ == '__main__':
         if losses < best_losses:
             best_losses = losses
             torch.save(model.state_dict(), 'checkpoints/model-epoch-{}-losses-{:.3f}.pth'.format(epoch + 1, losses))
-
-
