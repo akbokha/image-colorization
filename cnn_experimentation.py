@@ -214,10 +214,10 @@ class GrayscaleImageFolder(datasets.ImageFolder):
 def write_results_to_file(file_dir, file_name, data):
     file = open(file_dir + os.path.sep + file_name, 'a')
     if isinstance(data, str):
-        file.write(data)
+        file.write(data + '\n')
     else:
         for line in data:
-            file.write(line)
+            file.write(line + '\n')
     file.close()
 
 
