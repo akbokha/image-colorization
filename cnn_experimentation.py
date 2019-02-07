@@ -115,6 +115,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
     file_name = 'epoch_{}.txt'.format(epoch)
 
     print('Starting training epoch {}'.format(epoch))
+
+    write_results_to_file(dir_name, file_name, str(use_gpu))
+
     model.train()
 
     # Prepare value counters and timers
