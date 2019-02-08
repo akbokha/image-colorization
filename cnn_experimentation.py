@@ -106,12 +106,6 @@ def validate(val_loader, model, criterion, save_images, epoch):
 
 
 def train(train_loader, model, criterion, optimizer, epoch):
-    curr_time = str(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))
-    dir_name = './train/model_' + curr_time
-
-    if not os.path.isdir(dir_name):
-        os.makedirs(dir_name)
-
     file_name = 'epoch_{}.txt'.format(epoch)
 
     print('Starting training epoch {}'.format(epoch))
@@ -225,6 +219,12 @@ def write_results_to_file(file_dir, file_name, data):
 
 
 if __name__ == '__main__':
+    curr_time = str(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))
+    dir_name = './train/model_' + curr_time
+
+    if not os.path.isdir(dir_name):
+        os.makedirs(dir_name)
+        
     model = ColorizationNet()
     # since we are doing regression between the color value we predict and the ground truth
     criterion = nn.MSELoss()
