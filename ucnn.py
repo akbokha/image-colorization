@@ -186,4 +186,4 @@ for i in range(0,3):
     plt.imshow(color.lab2rgb(img))
 
 #plt.show()
-plt.savefig('foo.pdf')
+fig.savefig('foo.pdf')
