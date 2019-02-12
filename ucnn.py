@@ -127,7 +127,6 @@ test_grey = np.zeros((1000, 1, 32, 32))
 for i in range(0, len(test)):
     grey = np.dot(test[i].transpose(1,2,0), [0.299, 0.587, 0.114])
     test_grey[i][0] = grey
-plt.imshow(test_grey[5][0], cmap='gray')
 # Convert to 0-1 range to avoid tanh fuckery
 test_grey = test_grey.transpose(0,2,3,1)/255
 
@@ -147,7 +146,7 @@ optimizer = optim.Adam(net.parameters(), lr=0.00002, betas=(0.5,0.999))
 bestloss = np.inf
 bestmodel = Unet()
 
-for i in range(0,5000):
+for i in range(0,50):
     input = inputs[i*10:10+i*10]
     target = targets[i*10:10+i*10]
     
