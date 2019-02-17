@@ -14,6 +14,8 @@ from skimage import io, color
 import pickle
 import copy
 
+use_gpu = torch.cuda.is_available()
+
 def unpickle(file):
     
     with open(file, 'rb') as fo:
@@ -111,34 +113,32 @@ def to_rgb(grayscale_input, ab_input, save_path=None, save_name=None):
     if save_path is not None and save_name is not None:
         plt.imsave(arr=grayscale_input, fname='{}{}'.format(save_path['grayscale'], save_name), cmap='gray')
         plt.imsave(arr=color_image, fname='{}{}'.format(save_path['colorized'], save_name))
-        
-use_gpu = torch.cuda.is_available()
 
 class Unet(nn.Module):
     def __init__(self):
         super(Unet, self).__init__()
         #Convolution and deconvolution
-        self.conv1 = nn.Conv2d(1, 48, (4, 4), stride=2, padding=1)
-        self.conv2 = nn.Conv2d(48, 96, (4, 4), stride=2, padding=1)
-        self.conv3 = nn.Conv2d(96, 192, (4, 4), stride=2, padding=1)
-        self.conv4 = nn.Conv2d(192, 384, (4, 4), stride=2, padding=1)
+        self.conv1 = nn.Conv2d(1, 64, (4, 4), stride=2, padding=1)
+        self.conv2 = nn.Conv2d(64, 128, (4, 4), stride=2, padding=1)
+        self.conv3 = nn.Conv2d(128, 256, (4, 4), stride=2, padding=1)
+        self.conv4 = nn.Conv2d(256, 512, (4, 4), stride=2, padding=1)
         #self.conv5 = nn.Conv2d(3, 3, (4, 4), stride=2, padding=1)
-        self.deconv1 = nn.ConvTranspose2d(384, 192, (4, 4), stride=2, padding=1)
-        self.deconv2 = nn.ConvTranspose2d(384, 96, (4, 4), stride=2, padding=1)
-        self.deconv3 = nn.ConvTranspose2d(192, 48, (4, 4), stride=2, padding=1)
-        self.deconv4 = nn.ConvTranspose2d(96, 24, (4, 4), stride=2, padding=1)
-        self.conv5 = nn.Conv2d(24, 3, (1, 1))
+        self.deconv1 = nn.ConvTranspose2d(512, 256, (4, 4), stride=2, padding=1)
+        self.deconv2 = nn.ConvTranspose2d(512, 128, (4, 4), stride=2, padding=1)
+        self.deconv3 = nn.ConvTranspose2d(256, 64, (4, 4), stride=2, padding=1)
+        self.deconv4 = nn.ConvTranspose2d(128, 64, (4, 4), stride=2, padding=1)
+        self.conv5 = nn.Conv2d(64, 3, (1, 1))
         
         #Batchnorm
-        self.conv1_bnorm = nn.BatchNorm2d(48)
-        self.conv2_bnorm = nn.BatchNorm2d(96)
-        self.conv3_bnorm = nn.BatchNorm2d(192)
-        self.conv4_bnorm = nn.BatchNorm2d(384)
+        self.conv1_bnorm = nn.BatchNorm2d(64)
+        self.conv2_bnorm = nn.BatchNorm2d(128)
+        self.conv3_bnorm = nn.BatchNorm2d(256)
+        self.conv4_bnorm = nn.BatchNorm2d(512)
         
-        self.deconv1_bnorm = nn.BatchNorm2d(192)
-        self.deconv2_bnorm = nn.BatchNorm2d(96)
-        self.deconv3_bnorm = nn.BatchNorm2d(48)
-        self.deconv4_bnorm = nn.BatchNorm2d(24)
+        self.deconv1_bnorm = nn.BatchNorm2d(256)
+        self.deconv2_bnorm = nn.BatchNorm2d(128)
+        self.deconv3_bnorm = nn.BatchNorm2d(64)
+        self.deconv4_bnorm = nn.BatchNorm2d(64)
     
     def forward(self, x32):
         # Contraction
@@ -259,7 +259,7 @@ def validate(val_loader, model, criterion, save_images, epoch):
 
     end = time.time()
     already_saved_images = False
-    for i in range(0, val_loader.getIters()):
+    for i in range(0, 1):
         data_time.update(time.time() - end)
         
         (input_gray, target) = val_loader.getNext()
@@ -301,9 +301,9 @@ os.makedirs('res', exist_ok=True)
 os.makedirs('res/grey', exist_ok=True)
 os.makedirs('res/color/', exist_ok=True)
 
-optimizer = optim.Adam(net.parameters(), lr=0.00002, betas=(0.5,0.999))
+optimizer = optim.Adam(net.parameters(), lr=0.0002, betas=(0.5,0.999))
 criterion = torch.nn.MSELoss()
-epochs = 100
+epochs = 50
 save_images = True
 
 train_loader = CIFAR_iterator((train_grey, train_color), 64)
