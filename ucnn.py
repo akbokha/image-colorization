@@ -106,8 +106,7 @@ def to_rgb(grayscale_input, ab_input, save_path=None, save_name=None):
     plt.clf()  # clear matplotlib
     color_image = ab_input.numpy()  # combine channels
     color_image = color_image.transpose((1, 2, 0))  # rescale for matplotlib
-    color_image[:, :, 0:1] = color_image[:, :, 0:1] * 100
-    color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
+    color_image = color_image * 100
     color_image = color.lab2rgb(color_image.astype(np.float64))
     grayscale_input = grayscale_input.squeeze().numpy()
     if save_path is not None and save_name is not None:
