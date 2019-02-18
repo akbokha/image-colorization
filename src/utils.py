@@ -1,5 +1,10 @@
 import os
 import csv
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage.color import lab2rgb
+import torch
+
 
 class AverageMeter(object):
     '''An easy way to compute and store both average and current values'''
@@ -18,7 +23,6 @@ class AverageMeter(object):
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
-
 
 def save_stats(experiment_log_dir, filename, stats_dict, current_epoch, continue_from_mode=False, save_full_dict=True):
     """
@@ -51,3 +55,15 @@ def save_stats(experiment_log_dir, filename, stats_dict, current_epoch, continue
             writer.writerow(row_to_add)
 
     return summary_filename
+
+def save_colorized_images(grayscale_layer, ab_layers, save_paths, save_name):
+    '''Save grayscale and colorised versions of selected image'''
+    plt.clf()  # clear matplotlib
+    color_image = torch.cat((grayscale_layer, ab_layers), 0).numpy()  # combine channels
+    color_image = color_image.transpose((1, 2, 0))  # rescale for matplotlib
+    color_image[:, :, 0:1] = color_image[:, :, 0:1] * 100
+    color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
+    color_image = lab2rgb(color_image.astype(np.float64))
+    grayscale_input = grayscale_layer.squeeze().numpy()
+    plt.imsave(arr=grayscale_input, fname=os.path.join(save_paths['grayscale'], save_name), cmap='gray')
+    plt.imsave(arr=color_image, fname=os.path.join(save_paths['colorized'], save_name))

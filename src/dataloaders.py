@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from skimage.color import rgb2lab, rgb2gray, lab2rgb
+from skimage.color import rgb2lab, rgb2gray
 import torch
 import torch.utils.data
 from torchvision import datasets, transforms
