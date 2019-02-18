@@ -293,6 +293,7 @@ print("data  loaded")
 
 # Make net
 net = Unet()
+net = net.cuda()
 print("net initialised")
 
 # Ensure res directory exists
