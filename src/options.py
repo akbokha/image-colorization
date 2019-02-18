@@ -28,6 +28,8 @@ class ModelOptions:
                             help='models, stats etc. are saved here (default: ./output)')
         parser.add_argument('--max_epochs', type=int, default='5', help='max number of epoch to train for')
         parser.add_argument('--batch-size', type=int, default='5', help='training batch size')
+        parser.add_argument('--batch-output-frequency', type=int, default=1,
+                            help='frequency with which to output batch stats')
 
         self._parser = parser
 
