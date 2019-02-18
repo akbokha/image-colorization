@@ -1,4 +1,3 @@
-from __future__ import print_function
 import os
 import random
 import argparse
@@ -18,13 +17,17 @@ class ModelOptions:
         parser = argparse.ArgumentParser(description='image-colorization')
 
         parser.add_argument('--seed', type=int, default=0, metavar='S', help='random seed (default: 0)')
-        parser.add_argument('--model', type=str, default='test', help='Model name (default: test)')
-        parser.add_argument('--mode', default=0, help='run mode [0: train, 1: test] (default: 0)')
-        parser.add_argument('--dataset', type=str, default='cifar10',
-                            help='the dataset to use [cifar10] (default: cifar10)')
-        parser.add_argument('--dataset-path', type=str, default='./dataset', help='dataset path (default: ./dataset)')
-        parser.add_argument('--checkpoints-path', type=str, default='./checkpoints',
-                            help='models are saved here (default: ./checkpoints)')
+        parser.add_argument('--experiment-name', type=str, default='experiment_001',
+                            help='Experiment name (default: experiment_001)')
+        parser.add_argument('--model-name', type=str, default='resnet', help='Model architecture (default: resnet)')
+        parser.add_argument('--dataset-name', type=str, default='test',
+                            help='the input dataset to use [test, places365] (default: test)')
+        parser.add_argument('--dataset-root-path', type=str, default='./data',
+                            help='dataset root path (default: ./data)')
+        parser.add_argument('--output-root-path', type=str, default='./output',
+                            help='models, stats etc. are saved here (default: ./output)')
+        parser.add_argument('--max_epochs', type=int, default='5',
+                            help='max number of epoch to train for')
 
         self._parser = parser
 
@@ -34,10 +37,7 @@ class ModelOptions:
         if opt.seed == 0:
             opt.seed = random.randint(0, 2 ** 31 - 1)
 
-        if opt.dataset_path == './dataset':
-            opt.dataset_path += ('/' + opt.dataset)
-
-        if opt.checkpoints_path == './checkpoints':
-            opt.checkpoints_path += ('/' + opt.dataset)
+        opt.dataset_path = os.path.join(opt.dataset_root_path, opt.dataset_name)
+        opt.experiment_output_path = os.path.join(opt.output_root_path, opt.experiment_name)
 
         return opt
