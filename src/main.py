@@ -25,8 +25,8 @@ def main(options):
         os.makedirs(options.experiment_output_path)
 
     # Create data loaders
-    if options.dataset_name == 'test':
-        train_loader, val_loader = get_placeholder_loaders()
+    if options.dataset_name == 'placeholder':
+        train_loader, val_loader = get_placeholder_loaders(options.dataset_path, options.batch_size)
 
     # Create model
     if options.model_name == 'resnet':
@@ -67,7 +67,6 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available)
     # Train for single eopch
     start_time = time.time()
     for i, (input_gray, input_ab, target) in enumerate(train_loader):
-        print("Starting epoch ".format(epoch))
 
         # Use GPU if available
         input_gray_variable = Variable(input_gray).cuda() if gpu_available else Variable(input_gray)
@@ -94,7 +93,7 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available)
         batch_times.update(time.time() - start_time)
 
         # Print model accuracy -- in the code below, val refers to value, not validation
-        if i % args.print_freq == 0:
+        if i % 1 == 0:
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
                   'Data {data_times.val:.3f} ({data_times.avg:.3f})\t'

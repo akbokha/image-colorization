@@ -20,14 +20,14 @@ class ModelOptions:
         parser.add_argument('--experiment-name', type=str, default='experiment_001',
                             help='Experiment name (default: experiment_001)')
         parser.add_argument('--model-name', type=str, default='resnet', help='Model architecture (default: resnet)')
-        parser.add_argument('--dataset-name', type=str, default='test',
-                            help='the input dataset to use [test, places365] (default: test)')
+        parser.add_argument('--dataset-name', type=str, default='placeholder',
+                            help='the input dataset to use [placeholder, places365] (default: placeholder)')
         parser.add_argument('--dataset-root-path', type=str, default='./data',
                             help='dataset root path (default: ./data)')
         parser.add_argument('--output-root-path', type=str, default='./output',
                             help='models, stats etc. are saved here (default: ./output)')
-        parser.add_argument('--max_epochs', type=int, default='5',
-                            help='max number of epoch to train for')
+        parser.add_argument('--max_epochs', type=int, default='5', help='max number of epoch to train for')
+        parser.add_argument('--batch-size', type=int, default='5', help='training batch size')
 
         self._parser = parser
 
