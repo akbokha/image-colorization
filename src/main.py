@@ -30,7 +30,7 @@ def main(options):
 
     # Create model
     if options.model_name == 'resnet':
-        model = ResNetColorizeModel()
+        model = ResNetColorizationNet()
 
     # Define Loss function and optimizer
     criterion = nn.MSELoss().cuda() if gpu_available else nn.MSELoss()
@@ -67,9 +67,7 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available,
     print('Starting training epoch {}'.format(epoch))
 
     # Prepare value counters and timers
-    data_times = AverageMeter()
-    batch_times = AverageMeter()
-    loss_values = AverageMeter()
+    batch_times, data_times, loss_values = AverageMeter(), AverageMeter(), AverageMeter()
 
     # Switch model to train mode
     model.train()
@@ -79,17 +77,15 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available,
     for i, (input_gray, input_ab, target) in enumerate(train_loader):
 
         # Use GPU if available
-        input_gray_variable = Variable(input_gray).cuda() if gpu_available else Variable(input_gray)
-        input_ab_variable = Variable(input_ab).cuda() if gpu_available else Variable(input_ab)
-        target_variable = Variable(target).cuda() if gpu_available else Variable(target)
+        if gpu_available: input_gray, input_ab, target = input_gray.cuda(), input_ab.cuda(), target.cuda()
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
         start_time = time.time()
 
         # Run forward pass
-        output_ab = model(input_gray_variable)
-        loss = criterion(output_ab, input_ab_variable)
+        output_ab = model(input_gray)
+        loss = criterion(output_ab, input_ab)
 
         # Record loss and measure accuracy
         loss_values.update(loss.item(), input_gray.size(0))
@@ -101,6 +97,7 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available,
 
         # Record time to do forward and backward passes
         batch_times.update(time.time() - start_time)
+        start_time = time.time()
 
         # Print stats -- in the code below, val refers to value, not validation
         if i % options.batch_output_frequency == 0:
@@ -113,7 +110,7 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available,
 
     print('Finished training epoch {}'.format(epoch))
 
-    return (batch_times.sum + data_times.sum, loss_values.avg)
+    return batch_times.sum + data_times.sum, loss_values.avg
 
 
 def validate(val_loader, model, criterion, save_images, gpu_available, options):
@@ -122,9 +119,7 @@ def validate(val_loader, model, criterion, save_images, gpu_available, options):
     print('Starting validation.')
 
     # Prepare value counters and timers
-    data_times = AverageMeter()
-    batch_times = AverageMeter()
-    loss_values = AverageMeter()
+    batch_times, data_times, loss_values = AverageMeter(), AverageMeter(), AverageMeter()
 
     # Switch model to validation mode
     model.eval()
@@ -134,20 +129,15 @@ def validate(val_loader, model, criterion, save_images, gpu_available, options):
     for i, (input_gray, input_ab, target) in enumerate(val_loader):
 
         # Use GPU if available
-        target = target.cuda() if gpu_available else target
-        input_gray_variable = Variable(input_gray, volatile=True).cuda() if gpu_available else Variable(input_gray,
-                                                                                                  volatile=True)
-        input_ab_variable = Variable(input_ab, volatile=True).cuda() if gpu_available else Variable(input_ab,
-                                                                                                    volatile=True)
-        target_variable = Variable(target, volatile=True).cuda() if gpu_available else Variable(target, volatile=True)
+        if gpu_available: input_gray, input_ab, target = input_gray.cuda(), input_ab.cuda(), target.cuda()
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
         start_time = time.time()
 
         # Run forward pass
-        output_ab = model(input_gray_variable)  # throw away class predictions
-        loss = criterion(output_ab, input_ab_variable)  # check this!
+        output_ab = model(input_gray)
+        loss = criterion(output_ab, input_ab)
 
         # Record loss and measure accuracy
         loss_values.update(loss.item(), input_gray.size(0))
@@ -163,6 +153,7 @@ def validate(val_loader, model, criterion, save_images, gpu_available, options):
 
         # Record time to do forward passes and save images
         batch_times.update(time.time() - start_time)
+        start_time = time.time()
 
         # Print model accuracy -- in the code below, val refers to both value and validation
         if i % options.batch_output_frequency == 0:
