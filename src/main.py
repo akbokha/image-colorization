@@ -1,4 +1,5 @@
 import random
+import sys
 import time
 
 import torch
@@ -9,6 +10,9 @@ from .dataloaders import *
 from .models import *
 from .options import ModelOptions
 from .utils import *
+
+dataset_names = ['placeholder']
+model_names = ['resnet']
 
 
 def main(options):
@@ -23,9 +27,19 @@ def main(options):
     if not os.path.exists(options.experiment_output_path):
         os.makedirs(options.experiment_output_path)
 
+    # Check if specified dataset is one that is supported by experimentation framework
+    if options.dataset_name not in dataset_names:
+        print('{} is not a valid dataset. The supported datasets are: {}'.format(options.dataset_name, dataset_names))
+        clean_and_exit(options)
+
     # Create data loaders
     if options.dataset_name == 'placeholder':
         train_loader, val_loader = get_placeholder_loaders(options.dataset_path, options.batch_size)
+
+    # Check if specified model is one that is supported by experimentation framework
+    if options.model_name not in model_names:
+        print('{} is not a valid model. The supported models are: {}'.format(options.model_name, model_names))
+        clean_and_exit(options)
 
     # Create model
     if options.model_name == 'resnet':
@@ -176,6 +190,11 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
     print('Finished validation.')
 
     return loss_values.avg
+
+
+def clean_and_exit(options):
+    os.rmdir(options.experiment_output_path)
+    sys.exit(1)
 
 
 if __name__ == "__main__":
