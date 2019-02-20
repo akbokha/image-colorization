@@ -1,18 +1,17 @@
-import os
 import random
-import numpy as np
+import time
+
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 import torch.optim
-import time
-from .options import ModelOptions
-from .models import *
+
 from .dataloaders import *
+from .models import *
+from .options import ModelOptions
 from .utils import *
 
-def main(options):
 
+def main(options):
     # initialize random seed
     random.seed(options.seed)
     np.random.seed(options.seed)
@@ -49,7 +48,6 @@ def main(options):
     # train model
     epoch_stats = {"epoch": [], "train_time": [], "train_loss": [], 'val_loss': []}
     for epoch in range(options.max_epochs):
-
         train_time, train_loss = train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options)
         val_loss = validate_epoch(epoch, train_loader, model, criterion, True, gpu_available, options)
 
@@ -62,7 +60,9 @@ def main(options):
 
 
 def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options):
-    '''Train model on data in train_loader'''
+    """
+    Train model on data in train_loader
+    """
 
     print('Starting training epoch {}'.format(epoch))
 
@@ -114,7 +114,9 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available,
 
 
 def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_available, options):
-    '''Validate model on data in val_loader'''
+    """
+    Validate model on data in val_loader
+    """
 
     print('Starting validation.')
 

@@ -1,12 +1,16 @@
 import os
+
 import numpy as np
-from skimage.color import rgb2lab, rgb2gray
 import torch
 import torch.utils.data
+from skimage.color import rgb2lab, rgb2gray
 from torchvision import datasets, transforms
 
+
 def get_placeholder_loaders(placeholder_path, batch_size):
-    '''Get placeholder data set loaders (for framework testing only)'''
+    """
+    Get placeholder data set loaders (for framework testing only)
+    """
 
     train_directory = os.path.join(placeholder_path, 'train')
     train_transforms = transforms.Compose([
@@ -22,7 +26,7 @@ def get_placeholder_loaders(placeholder_path, batch_size):
         transforms.CenterCrop(224)
     ])
     val_directory = os.path.join(placeholder_path, 'val')
-    val_imagefolder = GrayscaleImageFolder(val_directory , val_transforms)
+    val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
     val_loader = torch.utils.data.DataLoader(val_imagefolder, batch_size=batch_size, shuffle=False,
                                              num_workers=1)
 
@@ -30,7 +34,9 @@ def get_placeholder_loaders(placeholder_path, batch_size):
 
 
 class GrayscaleImageFolder(datasets.ImageFolder):
-    '''Custom images folder, which converts images to grayscale before loading'''
+    """
+    Custom images folder, which converts images to grayscale before loading
+    """
 
     def __getitem__(self, index):
         path, target = self.imgs[index]

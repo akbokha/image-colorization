@@ -1,6 +1,6 @@
+import argparse
 import os
 import random
-import argparse
 
 
 def str2bool(v):
