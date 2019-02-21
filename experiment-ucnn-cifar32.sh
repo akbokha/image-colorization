@@ -34,4 +34,4 @@ export DATASET_DIR=${TMP}/datasets/
 
 
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
-python train.py --model=unet32 --dataset-name=cifar10
+python train.py --model=unet32 --dataset-name=cifar10 --batch-size=100 --batch-output-frequency=10

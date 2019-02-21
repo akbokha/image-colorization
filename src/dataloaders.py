@@ -64,7 +64,7 @@ def get_cifar10_loaders(dataset_path, batch_size):
         data_batch = data_batch_name.format(batch_num)
         batch_dir = os.path.join(train_directory, data_batch)
         train_data = np.append(train_data, np.reshape(unpickle_cifar10(batch_dir),
-                                                      (num_points_training_batch, 3, 32, 32)), 0)
+                                                      (10000, 3, 32, 32)), 0)
 
     train_lab_data = LabImageDataSet(train_data)
     train_loader = torch.utils.data.DataLoader(train_lab_data, batch_size=batch_size, shuffle=True, num_workers=1)
