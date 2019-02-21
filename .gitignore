@@ -9,5 +9,6 @@ __pycache__
 .ipynb_checkpoints
 
 # results
+output
 output/**/*.*
 slurm-*.out

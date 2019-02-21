@@ -64,13 +64,8 @@ def main(options):
     for epoch in range(options.max_epochs):
         train_time, train_loss = train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options)
         val_loss = validate_epoch(epoch, train_loader, model, criterion, True, gpu_available, options)
-
-        # Save epoch stats
-        epoch_stats['epoch'].append(epoch)
-        epoch_stats['train_time'].append(train_time)
-        epoch_stats['train_loss'].append(train_loss)
-        epoch_stats['val_loss'].append(val_loss)
-        save_stats(options.experiment_output_path, 'train_stats.csv', epoch_stats, epoch)
+        state_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options)
+        save_model_state(epoch, model, optimizer, options)
 
 
 def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options):
@@ -135,7 +130,7 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
     print('Starting validation.')
 
     # Create image output paths
-    image_output_root_path = os.path.join(options.experiment_output_path, 'images', 'epoch-{}'.format(epoch))
+    image_output_root_path = os.path.join(options.experiment_output_path, 'images', 'epoch-{0:03d}'.format(epoch))
     image_output_paths = {
         'grayscale': os.path.join(image_output_root_path, 'gray'),
         'colorized': os.path.join(image_output_root_path, 'colorized')
@@ -191,6 +186,26 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
 
     return loss_values.avg
 
+
+def state_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options):
+    epoch_stats['epoch'].append(epoch)
+    epoch_stats['train_time'].append(train_time)
+    epoch_stats['train_loss'].append(train_loss)
+    epoch_stats['val_loss'].append(val_loss)
+    save_stats(options.experiment_output_path, 'train_stats.csv', epoch_stats, epoch)
+
+
+def save_model_state(epoch, model, optimizer, options):
+    model_state_path = os.path.join(options.experiment_output_path, 'models', 'epoch-{0:03d}'.format(epoch))
+    if not os.path.exists(model_state_path):
+        os.makedirs(model_state_path)
+
+    state_dict = {
+        'epoch': epoch,
+        'model_state': model.state_dict(),
+        'optimizer_state': optimizer.state_dict(),
+    }
+    torch.save(state_dict, os.path.join(model_state_path, 'state_dict'))
 
 def clean_and_exit(options):
     os.rmdir(options.experiment_output_path)
