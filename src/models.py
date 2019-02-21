@@ -56,7 +56,7 @@ class UNet32(nn.Module):
         self.deconv2 = nn.ConvTranspose2d(512, 128, (4, 4), stride=2, padding=1)
         self.deconv3 = nn.ConvTranspose2d(256, 64, (4, 4), stride=2, padding=1)
         self.deconv4 = nn.ConvTranspose2d(128, 64, (4, 4), stride=2, padding=1)
-        self.conv5 = nn.Conv2d(64, 3, (1, 1))
+        self.conv5 = nn.Conv2d(64, 2, (1, 1))
         
         #Batchnorm
         self.conv1_bnorm = nn.BatchNorm2d(64)
