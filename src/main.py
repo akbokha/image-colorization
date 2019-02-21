@@ -12,7 +12,7 @@ from .options import ModelOptions
 from .utils import *
 
 dataset_names = ['placeholder']
-model_names = ['resnet']
+model_names = ['resnet', 'unet32']
 
 
 def main(options):
@@ -44,6 +44,12 @@ def main(options):
     # Create model
     if options.model_name == 'resnet':
         model = ResNetColorizationNet()
+    if options.model_name == 'unet32':
+        model = UNet32()
+    
+    # Make model use gpu if available
+    if gpu_available:
+        model = model.cuda()
 
     # Define Loss function and optimizer
     criterion = nn.MSELoss().cuda() if gpu_available else nn.MSELoss()
