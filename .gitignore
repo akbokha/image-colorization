@@ -10,5 +10,4 @@ __pycache__
 
 # results
 output
-output/**/*.*
 slurm-*.out
