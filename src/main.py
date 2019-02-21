@@ -11,7 +11,7 @@ from .models import *
 from .options import ModelOptions
 from .utils import *
 
-dataset_names = ['placeholder']
+dataset_names = ['placeholder', 'cifar10']
 model_names = ['resnet']
 
 
@@ -35,6 +35,8 @@ def main(options):
     # Create data loaders
     if options.dataset_name == 'placeholder':
         train_loader, val_loader = get_placeholder_loaders(options.dataset_path, options.batch_size)
+    elif options.dataset_name == 'cifar10':
+        train_loader, val_loader = get_cifar10_loaders(options.dataset_path, options.batch_size)
 
     # Check if specified model is one that is supported by experimentation framework
     if options.model_name not in model_names:
@@ -83,10 +85,10 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available,
 
     # Train for single eopch
     start_time = time.time()
-    for i, (input_gray, input_ab, target) in enumerate(train_loader):
+    for i, (input_gray, input_ab) in enumerate(train_loader):
 
         # Use GPU if available
-        if gpu_available: input_gray, input_ab, target = input_gray.cuda(), input_ab.cuda(), target.cuda()
+        if gpu_available: input_gray, input_ab = input_gray.cuda(), input_ab.cuda()
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
@@ -147,10 +149,10 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
 
     # Run through validation set
     start_time = time.time()
-    for i, (input_gray, input_ab, target) in enumerate(val_loader):
+    for i, (input_gray, input_ab) in enumerate(val_loader):
 
         # Use GPU if available
-        if gpu_available: input_gray, input_ab, target = input_gray.cuda(), input_ab.cuda(), target.cuda()
+        if gpu_available: input_gray, input_ab = input_gray.cuda(), input_ab.cuda()
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
