@@ -42,7 +42,7 @@ def unpickle_cifar10(file):
 
 def get_cifar10_loaders(dataset_path, batch_size):
     """
-    Get placeholder data set loaders (for framework testing only)
+    Get CIFAR-10 data set loaders
     """
 
     '''
