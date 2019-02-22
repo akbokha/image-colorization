@@ -30,6 +30,8 @@ class ModelOptions:
         parser.add_argument('--batch-size', type=int, default='5', help='training batch size')
         parser.add_argument('--batch-output-frequency', type=int, default=1,
                             help='frequency with which to output batch stats')
+        parser.add_argument('--max-images', type=int, default=10,
+                            help='maximum number of images from the validation set to be saved')
 
         self._parser = parser
 
