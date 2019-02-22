@@ -147,6 +147,8 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
     # Switch model to validation mode
     model.eval()
 
+    num_images_saved = 0
+
     # Run through validation set
     start_time = time.time()
     for i, (input_gray, input_ab) in enumerate(val_loader):
@@ -166,12 +168,13 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
         loss_values.update(loss.item(), input_gray.size(0))
 
         # Save images to file
-        if save_images:
-            for j in range(min(len(output_ab), 10)):  # save at most 10 images per batch
+        if save_images and num_images_saved < options.max_images:
+            for j in range(min(len(output_ab), options.max_images - num_images_saved)):
                 gray_layer = input_gray[j].detach().cpu()
                 ab_layers = output_ab[j].detach().cpu()
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
                 save_colorized_images(gray_layer, ab_layers, save_paths=image_output_paths, save_name=save_name)
+                num_images_saved += 1
 
         # Record time to do forward passes and save images
         batch_times.update(time.time() - start_time)
@@ -208,6 +211,7 @@ def save_model_state(epoch, model, optimizer, options):
         'optimizer_state': optimizer.state_dict(),
     }
     torch.save(state_dict, os.path.join(model_state_path, 'state_dict'))
+
 
 def clean_and_exit(options):
     os.rmdir(options.experiment_output_path)
