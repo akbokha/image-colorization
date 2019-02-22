@@ -65,7 +65,7 @@ def main(options):
     epoch_stats = {"epoch": [], "train_time": [], "train_loss": [], 'val_loss': []}
     for epoch in range(options.max_epochs):
         train_time, train_loss = train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options)
-        val_loss = validate_epoch(epoch, train_loader, model, criterion, True, gpu_available, options)
+        val_loss = validate_epoch(epoch, val_loader, model, criterion, True, gpu_available, options)
         state_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options)
         save_model_state(epoch, model, optimizer, options)
 
