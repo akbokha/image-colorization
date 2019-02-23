@@ -66,7 +66,7 @@ def get_cifar10_loaders(dataset_path, batch_size):
         train_data = np.append(train_data, np.reshape(unpickle_cifar10(batch_dir),
                                                       (num_points_training_batch, 3, 32, 32)), 0)
 
-    train_lab_data = LabImageDataSet(train_data)
+    train_lab_data = CIFAR10ImageDataSet(train_data)
     train_loader = torch.utils.data.DataLoader(train_lab_data, batch_size=batch_size, shuffle=True, num_workers=1)
 
     '''
@@ -88,7 +88,7 @@ def get_cifar10_loaders(dataset_path, batch_size):
         val_data = np.append(val_data, np.reshape(unpickle_cifar10(batch_dir),
                                                   (num_points_val_batch, 3, 32, 32)), 0)
 
-    val_lab_data = LabImageDataSet(val_data)
+    val_lab_data = CIFAR10ImageDataSet(val_data)
     val_loader = torch.utils.data.DataLoader(val_lab_data, batch_size=batch_size, shuffle=False, num_workers=1)
 
     return train_loader, val_loader
@@ -105,17 +105,20 @@ class GrayscaleImageFolder(datasets.ImageFolder):
         if self.transform is not None:
             img_original = self.transform(img)
             img_original = np.asarray(img_original)
+
             img_lab = rgb2lab(img_original)
             img_lab = (img_lab + 128) / 255
+
             img_ab = img_lab[:, :, 1:3]
             img_ab = torch.from_numpy(img_ab.transpose((2, 0, 1))).float()
-            img_original = rgb2gray(img_original)
-            img_original = torch.from_numpy(img_original).unsqueeze(0).float()
 
-        return img_original, img_ab
+            img_gray = rgb2gray(img_original)
+            img_gray = torch.from_numpy(img_gray).unsqueeze(0).float()
+
+        return img_gray, img_ab, img_original
 
 
-class LabImageDataSet(torch.utils.data.Dataset):
+class CIFAR10ImageDataSet(torch.utils.data.Dataset):
     def __init__(self, data, transforms=None):
         self.data = data
         self.transforms = transforms
@@ -124,16 +127,21 @@ class LabImageDataSet(torch.utils.data.Dataset):
         img = self.data[index]
         img_original = np.asarray(img)
         img_original = img_original.transpose(1, 2, 0)
+        img_original = img_original / 255
+
         if self.transforms is not None:
             img_original = self.transforms(img_original)
+
         img_lab = rgb2lab(img_original)
         img_lab = (img_lab + 128) / 255
+
         img_ab = img_lab[:, :, 1:3]
         img_ab = torch.from_numpy(img_ab.transpose((2, 0, 1))).float()
-        img_original = rgb2gray(img_original)
-        img_original = torch.from_numpy(img_original).unsqueeze(0).float()
 
-        return img_original, img_ab
+        img_gray = rgb2gray(img_original)
+        img_gray = torch.from_numpy(img_gray).unsqueeze(0).float()
+
+        return img_gray, img_ab, img_original
 
     def __len__(self):
         return self.data.shape[0]
