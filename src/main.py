@@ -179,6 +179,7 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
                 ab_layers = output_ab[j].detach().cpu()
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
                 save_colorized_images(gray_layer, ab_layers, save_paths=image_output_paths, save_name=save_name)
+                saved = saved + 1
 
         # Record time to do forward passes and save images
         batch_times.update(time.time() - start_time)
