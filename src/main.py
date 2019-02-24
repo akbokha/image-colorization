@@ -47,6 +47,9 @@ def main(options):
     if options.model_name == 'resnet':
         model = ResNetColorizationNet()
 
+    if gpu_available:
+        model = model.cuda()
+
     # Define Loss function and optimizer
     criterion = nn.MSELoss().cuda() if gpu_available else nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters())
@@ -83,12 +86,12 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available,
     # Switch model to train mode
     model.train()
 
-    # Train for single eopch
+    # Train for single epoch
     start_time = time.time()
     for i, (input_gray, input_ab, img_original) in enumerate(train_loader):
 
         # Use GPU if available
-        if gpu_available: input_gray, input_ab = input_gray.cuda(), input_ab.cuda()
+        if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
@@ -155,7 +158,7 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
     for i, (input_gray, input_ab, img_original) in enumerate(val_loader):
 
         # Use GPU if available
-        if gpu_available: input_gray, input_ab = input_gray.cuda(), input_ab.cuda()
+        if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
