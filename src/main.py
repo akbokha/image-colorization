@@ -85,7 +85,7 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available,
 
     # Train for single eopch
     start_time = time.time()
-    for i, (input_gray, input_ab) in enumerate(train_loader):
+    for i, (input_gray, input_ab, img_original) in enumerate(train_loader):
 
         # Use GPU if available
         if gpu_available: input_gray, input_ab = input_gray.cuda(), input_ab.cuda()
@@ -135,7 +135,8 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
     image_output_root_path = os.path.join(options.experiment_output_path, 'images', 'epoch-{0:03d}'.format(epoch))
     image_output_paths = {
         'grayscale': os.path.join(image_output_root_path, 'gray'),
-        'colorized': os.path.join(image_output_root_path, 'colorized')
+        'colorized': os.path.join(image_output_root_path, 'colorized'),
+        'original': os.path.join(image_output_root_path, 'original')
     }
     for image_path in image_output_paths.values():
         if not os.path.exists(image_path):
@@ -151,7 +152,7 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
 
     # Run through validation set
     start_time = time.time()
-    for i, (input_gray, input_ab) in enumerate(val_loader):
+    for i, (input_gray, input_ab, img_original) in enumerate(val_loader):
 
         # Use GPU if available
         if gpu_available: input_gray, input_ab = input_gray.cuda(), input_ab.cuda()
@@ -173,7 +174,8 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
                 gray_layer = input_gray[j].detach().cpu()
                 ab_layers = output_ab[j].detach().cpu()
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
-                save_colorized_images(gray_layer, ab_layers, save_paths=image_output_paths, save_name=save_name)
+                save_colorized_images(gray_layer, ab_layers, img_original[j],
+                                      save_paths=image_output_paths, save_name=save_name)
                 num_images_saved += 1
 
         # Record time to do forward passes and save images
