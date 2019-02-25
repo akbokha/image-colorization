@@ -1,11 +1,45 @@
 import os
+import sys
 import pickle
+import tarfile
 
 import numpy as np
 import torch
 import torch.utils.data
 from skimage.color import rgb2lab, rgb2gray
 from torchvision import datasets, transforms
+
+
+def files_present(files_and_dirs, dataset_path, num_files=None):
+    for fd in files_and_dirs:
+        path = os.path.join(dataset_path, fd)
+        if not os.path.exists(path):  # can be either a file or directory
+            return False
+        if num_files is not None:
+            num_files_present = len(
+                [img for img in os.listdir(path)
+                 if os.path.isfile(os.path.join(path, img)) and not img.startswith('.')])
+            print(num_files_present)
+            if num_files_present != num_files:
+                return False
+    return True
+
+
+def download_data(url, file, files_and_dirs, dataset_path, num_files=None):
+    if files_present(files_and_dirs, dataset_path, num_files):
+        print("Files already downloaded")
+        return
+
+    datasets.utils.download_url(url, root=dataset_path, filename=file, md5=None)
+
+    with tarfile.open(os.path.join(dataset_path, file), 'r:gz') as tar:
+        tar.extractall(path=dataset_path)
+
+
+def unpickle(file):
+    with open(file, 'rb') as fo:
+        dict = pickle.load(fo, encoding='bytes')
+    return dict[b"data"]
 
 
 def get_placeholder_loaders(placeholder_path, batch_size):
@@ -34,20 +68,12 @@ def get_placeholder_loaders(placeholder_path, batch_size):
     return train_loader, val_loader
 
 
-def unpickle(file):
-    with open(file, 'rb') as fo:
-        dict = pickle.load(fo, encoding='bytes')
-    return dict[b"data"]
-
-
 def get_cifar10_loaders(dataset_path, batch_size):
     """
-    Get CIFAR-10 data set loaders
+    Get CIFAR-10 dataset loaders
     """
 
-    '''
-    Process training data into a DataLoader object
-    '''
+    # Process training data into a DataLoader object
     train_transforms = transforms.Compose([
         transforms.RandomHorizontalFlip()
     ])
@@ -68,9 +94,7 @@ def get_cifar10_loaders(dataset_path, batch_size):
     train_lab_data = CIFAR10ImageDataSet(train_data, transforms=train_transforms)
     train_loader = torch.utils.data.DataLoader(train_lab_data, batch_size=batch_size, shuffle=True, num_workers=1)
 
-    '''
-    Process validation data into a DataLoader object
-    '''
+    # Process validation data into a DataLoader object
     val_transforms = transforms.Compose([
         transforms.Scale(32)
     ])
@@ -86,6 +110,20 @@ def get_cifar10_loaders(dataset_path, batch_size):
     val_loader = torch.utils.data.DataLoader(val_lab_data, batch_size=1, shuffle=False, num_workers=1)
 
     return train_loader, val_loader
+
+
+def get_places_loaders(dataset_path, batch_size):
+    """
+    Get Places205 dataset loaders
+    """
+    url = 'http://data.csail.mit.edu/places/places205/testSetPlaces205_resize.tar.gz'
+    file_name = 'testSetPlaces205_resize.tar.gz'
+    dir_name = 'testSet_resize'
+    num_files = 41000
+
+    download_data(url, file_name, [dir_name], dataset_path, num_files)
+
+    return None
 
 
 class GrayscaleImageFolder(datasets.ImageFolder):
@@ -142,4 +180,3 @@ class CIFAR10ImageDataSet(torch.utils.data.Dataset):
 
     def __len__(self):
         return self.data.shape[0]
-
