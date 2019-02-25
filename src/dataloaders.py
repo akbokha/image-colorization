@@ -34,7 +34,7 @@ def get_placeholder_loaders(placeholder_path, batch_size):
     return train_loader, val_loader
 
 
-def unpickle_cifar10(file):
+def unpickle(file):
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict[b"data"]
@@ -62,7 +62,7 @@ def get_cifar10_loaders(dataset_path, batch_size):
     for batch_num in range(1, 6):
         data_batch = data_batch_name.format(batch_num)
         batch_dir = os.path.join(dataset_path, data_batch)
-        train_data = np.append(train_data, np.reshape(unpickle_cifar10(batch_dir),
+        train_data = np.append(train_data, np.reshape(unpickle(batch_dir),
                                                       (num_points_training_batch, 3, 32, 32)), 0)
 
     train_lab_data = CIFAR10ImageDataSet(train_data, transforms=train_transforms)
@@ -77,7 +77,7 @@ def get_cifar10_loaders(dataset_path, batch_size):
 
     val_set_name = 'cifar-10-batches-py/test_batch'
     val_dir = os.path.join(dataset_path, val_set_name)
-    val_data = unpickle_cifar10(val_dir)
+    val_data = unpickle(val_dir)
     num_points_val_batch = val_data.shape[0]
 
     val_data = np.reshape(val_data, (num_points_val_batch, 3, 32, 32))
