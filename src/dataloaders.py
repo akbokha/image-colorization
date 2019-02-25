@@ -10,30 +10,35 @@ from skimage.color import rgb2lab, rgb2gray
 from torchvision import datasets, transforms
 
 
-def files_present(files_and_dirs, dataset_path, num_files=None):
-    for fd in files_and_dirs:
-        path = os.path.join(dataset_path, fd)
-        if not os.path.exists(path):  # can be either a file or directory
+def files_are_present(dataset_path, num_files=None):
+    if not os.path.exists(dataset_path):  # can be either a file or directory
+        return False
+    if num_files is not None:  # in case one wants to check the number of files in the directory
+        files_present = [file for r, d, files in os.walk(dataset_path) for file in files if not file.startswith('.')]
+        num_files_present = len(files_present)
+        if num_files_present != num_files:  # to check whether the download + file-extraction was successful
             return False
-        if num_files is not None:
-            num_files_present = len(
-                [img for img in os.listdir(path)
-                 if os.path.isfile(os.path.join(path, img)) and not img.startswith('.')])
-            print(num_files_present)
-            if num_files_present != num_files:
-                return False
     return True
 
 
-def download_data(url, file, files_and_dirs, dataset_path, num_files=None):
-    if files_present(files_and_dirs, dataset_path, num_files):
+def download_data(url, file, dataset_path, num_files=None):
+    """
+    :param url: the url of the data file
+    :param file: the name of the data file (renaming allowed)
+    :param dataset_path: the path where the data file should be
+    :param num_files: the number of files that should be included in the data-file
+    :return: whether data had to be downloaded (boolean can be used to do some post-processing)
+    """
+    if files_are_present(dataset_path, num_files):
         print("Files already downloaded")
-        return
+        return False
 
     datasets.utils.download_url(url, root=dataset_path, filename=file, md5=None)
 
     with tarfile.open(os.path.join(dataset_path, file), 'r:gz') as tar:
         tar.extractall(path=dataset_path)
+
+    return True
 
 
 def unpickle(file):
@@ -119,11 +124,44 @@ def get_places_loaders(dataset_path, batch_size):
     url = 'http://data.csail.mit.edu/places/places205/testSetPlaces205_resize.tar.gz'
     file_name = 'testSetPlaces205_resize.tar.gz'
     dir_name = 'testSet_resize'
-    num_files = 41000
+    num_files = 41006
 
-    download_data(url, file_name, [dir_name], dataset_path, num_files)
+    train_directory = os.path.join(dataset_path, 'train')
+    val_directory = os.path.join(dataset_path, 'val')
 
-    return None
+    had_to_download_data = download_data(url, file_name, dataset_path, num_files)
+
+    if had_to_download_data:
+        val_img_dir = os.path.join(val_directory, 'class')
+        train_img_dir = os.path.join(train_directory, 'class')
+        os.makedirs(val_img_dir, exist_ok=True)
+        os.makedirs(train_img_dir, exist_ok=True)
+
+        full_dir = os.path.join(dataset_path, dir_name)
+        for i, file in enumerate(os.listdir(full_dir)):
+            if i < 1000:  # first 1000 will be val
+                os.rename(os.path.join(full_dir, file), os.path.join(val_img_dir, file))
+            else:  # others will be training
+                os.rename(os.path.join(full_dir, file), os.path.join(train_img_dir, file))
+
+    train_transforms = transforms.Compose([
+        transforms.RandomSizedCrop(224),
+        transforms.RandomHorizontalFlip()
+    ])
+    train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
+    train_loader = torch.utils.data.DataLoader(train_imagefolder, batch_size=batch_size, shuffle=True,
+                                               num_workers=1)
+
+    val_transforms = transforms.Compose([
+        transforms.Scale(256),
+        transforms.CenterCrop(224)
+    ])
+
+    val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
+    val_loader = torch.utils.data.DataLoader(val_imagefolder, batch_size=batch_size, shuffle=False,
+                                             num_workers=1)
+
+    return train_loader, val_loader
 
 
 class GrayscaleImageFolder(datasets.ImageFolder):
