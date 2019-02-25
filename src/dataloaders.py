@@ -124,7 +124,9 @@ def get_places_loaders(dataset_path, batch_size):
     url = 'http://data.csail.mit.edu/places/places205/testSetPlaces205_resize.tar.gz'
     file_name = 'testSetPlaces205_resize.tar.gz'
     dir_name = 'testSet_resize'
-    num_files = 41006
+    num_files = 41000
+
+    validation_set_size = 1000
 
     train_directory = os.path.join(dataset_path, 'train')
     val_directory = os.path.join(dataset_path, 'val')
@@ -132,6 +134,7 @@ def get_places_loaders(dataset_path, batch_size):
     had_to_download_data = download_data(url, file_name, dataset_path, num_files)
 
     if had_to_download_data:
+        # need to place images in a sub-folder (see https://github.com/pytorch/examples/issues/236 for more info)
         val_img_dir = os.path.join(val_directory, 'class')
         train_img_dir = os.path.join(train_directory, 'class')
         os.makedirs(val_img_dir, exist_ok=True)
@@ -139,10 +142,18 @@ def get_places_loaders(dataset_path, batch_size):
 
         full_dir = os.path.join(dataset_path, dir_name)
         for i, file in enumerate(os.listdir(full_dir)):
-            if i < 1000:  # first 1000 will be val
+            if i < validation_set_size:  # first x will be val
                 os.rename(os.path.join(full_dir, file), os.path.join(val_img_dir, file))
             else:  # others will be training
                 os.rename(os.path.join(full_dir, file), os.path.join(train_img_dir, file))
+
+        # remove the old directory
+        os.rmdir(full_dir)
+
+        # remove all the other obsolete/irrelevant files that have been downloaded
+        to_be_removed_files = [file for file in os.listdir(dataset_path) if file not in ['train', 'val']]
+        for file in to_be_removed_files:
+            os.remove(os.path.join(dataset_path, file))
 
     train_transforms = transforms.Compose([
         transforms.RandomSizedCrop(224),
