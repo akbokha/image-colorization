@@ -59,7 +59,7 @@ def save_stats(experiment_log_dir, filename, stats_dict, current_epoch, continue
     return summary_filename
 
 
-def save_colorized_images(grayscale_layer, ab_layers, save_paths, save_name):
+def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, save_name):
     """
     Save grayscale and colorised versions of selected image
     """
@@ -72,3 +72,5 @@ def save_colorized_images(grayscale_layer, ab_layers, save_paths, save_name):
     grayscale_input = grayscale_layer.squeeze().numpy()
     plt.imsave(arr=grayscale_input, fname=os.path.join(save_paths['grayscale'], save_name), cmap='gray')
     plt.imsave(arr=color_image, fname=os.path.join(save_paths['colorized'], save_name))
+    plt.imsave(arr=img_original, fname=os.path.join(save_paths['original'], save_name))
+
