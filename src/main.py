@@ -11,7 +11,7 @@ from .models import *
 from .options import ModelOptions
 from .utils import *
 
-dataset_names = ['placeholder', 'cifar10']
+dataset_names = ['placeholder', 'cifar10', 'places205']
 model_names = ['resnet']
 
 
@@ -37,6 +37,8 @@ def main(options):
         train_loader, val_loader = get_placeholder_loaders(options.dataset_path, options.batch_size)
     elif options.dataset_name == 'cifar10':
         train_loader, val_loader = get_cifar10_loaders(options.dataset_path, options.batch_size)
+    elif options.dataset_name == 'places205':
+        train_loader, val_loader = get_places_loaders(options.dataset_path, options.batch_size)
 
     # Check if specified model is one that is supported by experimentation framework
     if options.model_name not in model_names:

@@ -11,3 +11,5 @@ __pycache__
 # results
 output
 slurm-*.out
+
+data/places205/
