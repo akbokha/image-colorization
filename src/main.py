@@ -135,11 +135,10 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
     print('Starting validation.')
 
     # Create image output paths
-    image_output_root_path = os.path.join(options.experiment_output_path, 'images', 'epoch-{0:03d}'.format(epoch))
     image_output_paths = {
-        'grayscale': os.path.join(image_output_root_path, 'gray'),
-        'colorized': os.path.join(image_output_root_path, 'colorized'),
-        'original': os.path.join(image_output_root_path, 'original')
+        'grayscale': os.path.join(options.experiment_output_path, 'images', 'gray'),
+        'original': os.path.join(options.experiment_output_path, 'images', 'original'),
+        'colorized': os.path.join(options.experiment_output_path, 'colorizations', 'epoch-{0:03d}'.format(epoch))
     }
     for image_path in image_output_paths.values():
         if not os.path.exists(image_path):
@@ -177,6 +176,11 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
                 gray_layer = input_gray[j].detach().cpu()
                 ab_layers = output_ab[j].detach().cpu()
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
+                # save gray-scale image and respective ground-truth images after first epoch
+                if epoch == 0:
+                    save_colorized_images(gray_layer, ab_layers, img_original[j],
+                                          save_paths=image_output_paths, save_name=save_name, save_static_images=True)
+                # save colorizations after every epoch
                 save_colorized_images(gray_layer, ab_layers, img_original[j],
                                       save_paths=image_output_paths, save_name=save_name)
                 num_images_saved += 1
