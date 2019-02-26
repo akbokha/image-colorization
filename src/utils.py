@@ -63,7 +63,6 @@ def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, 
     """
     Save grayscale and colorised versions of selected image
     """
-    plt.clf()  # clear matplotlib
     color_image = torch.cat((grayscale_layer, ab_layers), 0).numpy()  # combine channels
     color_image = color_image.transpose((1, 2, 0))  # rescale for matplotlib
     color_image[:, :, 0:1] = color_image[:, :, 0:1] * 100
