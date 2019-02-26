@@ -71,5 +71,5 @@ def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, 
     grayscale_input = grayscale_layer.squeeze().numpy()
     plt.imsave(arr=grayscale_input, fname=os.path.join(save_paths['grayscale'], save_name), cmap='gray')
     plt.imsave(arr=color_image, fname=os.path.join(save_paths['colorized'], save_name))
-    plt.imsave(arr=img_original, fname=os.path.join(save_paths['original'], save_name))
+    plt.imsave(arr=img_original.cpu(), fname=os.path.join(save_paths['original'], save_name))
 
