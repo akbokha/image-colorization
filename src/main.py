@@ -52,9 +52,6 @@ def main(options):
     if gpu_available:
         model = model.cuda()
 
-    if gpu_available:
-        model = model.cuda()
-
     # Define Loss function and optimizer
     criterion = nn.MSELoss().cuda() if gpu_available else nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters())
