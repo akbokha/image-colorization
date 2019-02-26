@@ -52,6 +52,10 @@ def get_cifar10_loaders(dataset_path, batch_size):
         transforms.RandomHorizontalFlip()
     ])
 
+    # Print if data is already downloaded
+    data_file = os.path.join(dataset_path, 'cifar-10-batches-py/data_batch_1')
+    print(os.path.exists(data_file))
+    
     train_set = datasets.CIFAR10(root=dataset_path, train=True, download=True)
     num_training_points = train_set.__len__()
     num_points_training_batch = int(num_training_points / batch_size)

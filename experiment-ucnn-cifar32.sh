@@ -28,10 +28,15 @@ mkdir -p /disk/scratch/${STUDENT_ID}
 export TMPDIR=/disk/scratch/${STUDENT_ID}/
 export TMP=/disk/scratch/${STUDENT_ID}/
 
-mkdir -p ${TMP}/datasets/
-export DATASET_DIR=${TMP}/datasets/
+#mkdir -p ${TMP}/datasets/
+#export DATASET_DIR=${TMP}/datasets/
+
+mkdir ${TMP}/data/
+rsync -ua --progress /home/${STUDENT_ID}/data/ ${TMP}/data/
+export DATASET_DIR = ${TMP}/data/
+
 # Activate the relevant virtual environment:
-
-
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 python train.py --model=unet32 --dataset-name=cifar10 --batch-size=100 --batch-output-frequency=10
+
+rsync -ua --progress output $(whoami)@student.ssh.inf.ed.ac.uk:/home/$(whoami)/Downloads/mlp
