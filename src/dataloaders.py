@@ -93,7 +93,6 @@ def get_cifar10_loaders(dataset_path, batch_size):
     for batch_num in range(1, 6):
         data_batch = data_batch_name.format(batch_num)
         batch_dir = os.path.join(dataset_path, data_batch)
-        unet_testing
         train_data = np.append(train_data, np.reshape(unpickle_cifar10(batch_dir),
                                                       (10000, 3, 32, 32)), 0)
 
