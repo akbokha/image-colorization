@@ -11,16 +11,15 @@ from .models import *
 from .options import ModelOptions
 from .utils import *
 
-dataset_names = ['placeholder', 'cifar10', 'places205']
-model_names = ['resnet']
-
+dataset_names = ['placeholder', 'cifar10', 'places205']]
+model_names = ['resnet', 'unet32']
 
 def main(options):
     # initialize random seed
     random.seed(options.seed)
     np.random.seed(options.seed)
     torch.manual_seed(options.seed)
-
+    
     gpu_available = torch.cuda.is_available()
 
     # Create output directory
@@ -48,7 +47,10 @@ def main(options):
     # Create model
     if options.model_name == 'resnet':
         model = ResNetColorizationNet()
-
+    if options.model_name == 'unet32':
+        model = UNet32()
+    
+    # Make model use gpu if available
     if gpu_available:
         model = model.cuda()
 
@@ -151,7 +153,7 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
 
     # Switch model to validation mode
     model.eval()
-
+    
     num_images_saved = 0
 
     # Run through validation set

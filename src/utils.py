@@ -63,7 +63,6 @@ def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, 
     """
     Save grayscale and colorised versions of selected image
     """
-    plt.clf()  # clear matplotlib
     if save_static_images:  # save non-changing gray-scale and ground_truth images
         grayscale_input = grayscale_layer.squeeze().numpy()
         plt.imsave(arr=grayscale_input, fname=os.path.join(save_paths['grayscale'], save_name), cmap='gray')
