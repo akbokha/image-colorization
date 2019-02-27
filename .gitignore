@@ -12,4 +12,6 @@ __pycache__
 output
 slurm-*.out
 
+# datasets
 data/places205/
+data/places365/
