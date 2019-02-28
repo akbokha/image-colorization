@@ -1,8 +1,6 @@
 import os
-import sys
 import pickle
 import tarfile
-
 import numpy as np
 import torch
 import torch.utils.data
@@ -47,33 +45,41 @@ def unpickle(file):
     return dict[b"data"]
 
 
-def get_placeholder_loaders(placeholder_path, batch_size):
+def get_224_train_transforms():
+    return transforms.Compose([
+        transforms.RandomSizedCrop(224),
+        transforms.RandomHorizontalFlip()
+    ])
+
+
+def get_224_val_transforms():
+    return transforms.Compose([
+        transforms.Scale(256),
+        transforms.CenterCrop(224)
+    ])
+
+
+def get_placeholder_loaders(placeholder_path, train_batch_size, val_batch_size):
     """
     Get placeholder data set loaders (for framework testing only)
     """
 
     train_directory = os.path.join(placeholder_path, 'train')
-    train_transforms = transforms.Compose([
-        transforms.RandomSizedCrop(224),
-        transforms.RandomHorizontalFlip()
-    ])
+    train_transforms = get_224_train_transforms()
     train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
-    train_loader = torch.utils.data.DataLoader(train_imagefolder, batch_size=batch_size, shuffle=True,
-                                               num_workers=1)
+    train_loader = torch.utils.data.DataLoader(
+        train_imagefolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
 
-    val_transforms = transforms.Compose([
-        transforms.Scale(256),
-        transforms.CenterCrop(224)
-    ])
+    val_transforms = get_224_val_transforms()
     val_directory = os.path.join(placeholder_path, 'val')
     val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
-    val_loader = torch.utils.data.DataLoader(val_imagefolder, batch_size=batch_size, shuffle=False,
-                                             num_workers=1)
+    val_loader = torch.utils.data.DataLoader(
+        val_imagefolder, batch_size=val_batch_size, shuffle=False, num_workers=1)
 
     return train_loader, val_loader
 
 
-def get_cifar10_loaders(dataset_path, batch_size):
+def get_cifar10_loaders(dataset_path, train_batch_size, val_batch_size):
     """
     Get CIFAR-10 dataset loaders
     """
@@ -82,10 +88,9 @@ def get_cifar10_loaders(dataset_path, batch_size):
     train_transforms = transforms.Compose([
         transforms.RandomHorizontalFlip()
     ])
-
-    train_set = datasets.CIFAR10(root=dataset_path, train=True, download=True)
-    num_training_points = train_set.__len__()
-    num_points_training_batch = int(num_training_points / batch_size)
+    
+    # Used to download the data
+    datasets.CIFAR10(root=dataset_path, train=True, download=True)
 
     train_data = np.array([]).reshape(0, 3, 32, 32)
 
@@ -97,7 +102,8 @@ def get_cifar10_loaders(dataset_path, batch_size):
                                                       (10000, 3, 32, 32)), 0)
 
     train_lab_data = CIFAR10ImageDataSet(train_data, transforms=train_transforms)
-    train_loader = torch.utils.data.DataLoader(train_lab_data, batch_size=batch_size, shuffle=True, num_workers=1)
+    train_loader = torch.utils.data.DataLoader(
+        train_lab_data, batch_size=train_batch_size, shuffle=True, num_workers=1)
 
     # Process validation data into a DataLoader object
     val_transforms = transforms.Compose([
@@ -112,12 +118,13 @@ def get_cifar10_loaders(dataset_path, batch_size):
     val_data = np.reshape(val_data, (num_points_val_batch, 3, 32, 32))
 
     val_lab_data = CIFAR10ImageDataSet(val_data, transforms=val_transforms)
-    val_loader = torch.utils.data.DataLoader(val_lab_data, batch_size=1, shuffle=False, num_workers=1)
+    val_loader = torch.utils.data.DataLoader(
+        val_lab_data, batch_size=val_batch_size, shuffle=False, num_workers=1)
 
     return train_loader, val_loader
 
 
-def get_places_loaders(dataset_path, batch_size):
+def get_places205_loaders(dataset_path, train_batch_size, val_batch_size):
     """
     Get Places205 dataset loaders
     """
@@ -155,22 +162,36 @@ def get_places_loaders(dataset_path, batch_size):
         for file in to_be_removed_files:
             os.remove(os.path.join(dataset_path, file))
 
-    train_transforms = transforms.Compose([
-        transforms.RandomSizedCrop(224),
-        transforms.RandomHorizontalFlip()
-    ])
+    train_transforms = get_224_train_transforms()
     train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
-    train_loader = torch.utils.data.DataLoader(train_imagefolder, batch_size=batch_size, shuffle=True,
-                                               num_workers=1)
+    train_loader = torch.utils.data.DataLoader(
+        train_imagefolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
 
-    val_transforms = transforms.Compose([
-        transforms.Scale(256),
-        transforms.CenterCrop(224)
-    ])
-
+    val_transforms = get_224_val_transforms()
     val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
-    val_loader = torch.utils.data.DataLoader(val_imagefolder, batch_size=batch_size, shuffle=False,
-                                             num_workers=1)
+    val_loader = torch.utils.data.DataLoader(
+        val_imagefolder, batch_size=val_batch_size, shuffle=False, num_workers=1)
+
+    return train_loader, val_loader
+
+
+def get_places365_loaders(dataset_path, train_batch_size, val_batch_size):
+    """
+    Get Places365 dataset loaders
+    """
+
+    train_directory = os.path.join(dataset_path, 'train')
+    val_directory = os.path.join(dataset_path, 'val')
+
+    train_transforms = get_224_train_transforms()
+    train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
+    train_loader = torch.utils.data.DataLoader(
+        train_imagefolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
+
+    val_transforms = get_224_val_transforms()
+    val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
+    val_loader = torch.utils.data.DataLoader(
+        val_imagefolder, batch_size=val_batch_size, shuffle=False, num_workers=1)
 
     return train_loader, val_loader
 

@@ -27,7 +27,8 @@ class ModelOptions:
         parser.add_argument('--output-root-path', type=str, default='./output',
                             help='models, stats etc. are saved here (default: ./output)')
         parser.add_argument('--max-epochs', type=int, default='5', help='max number of epoch to train for')
-        parser.add_argument('--batch-size', type=int, default='5', help='training batch size')
+        parser.add_argument('--train-batch-size', type=int, default='100', help='training batch size')
+        parser.add_argument('--val-batch-size', type=int, default='100', help='validation batch size')
         parser.add_argument('--batch-output-frequency', type=int, default=1,
                             help='frequency with which to output batch stats')
         parser.add_argument('--max-images', type=int, default=10,
