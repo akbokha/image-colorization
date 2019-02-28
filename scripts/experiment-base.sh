@@ -37,4 +37,4 @@ export DATASET_DIR = ${TMP}/data/
 
 # Activate the relevant virtual environment:
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
-python train.py --experiment-name=experiment_001 --model=unet32 --dataset-name=cifar10 --batch-size=100 --batch-output-frequency=10 --max-images=10
+python ../train.py --experiment-name=experiment_001 --model=unet32 --dataset-name=cifar10 --batch-size=100 --batch-output-frequency=10 --max-images=10

@@ -84,8 +84,12 @@ def get_cifar10_loaders(dataset_path, batch_size):
     ])
 
     # Print if data is already downloaded
-    data_file = os.path.join(dataset_path, 'cifar-10-batches-py/data_batch_1')
-    print(os.path.exists(data_file))
+    data_batch_name = 'cifar-10-batches-py/data_batch_{}'
+    for batch_num in range(1, 6):
+        data_batch = data_batch_name.format(batch_num)
+        data_file = os.path.join(dataset_path, data_batch)
+        if os.path.exists(data_file):
+            print("Batch {0} present".format(batch_num))
     
     train_set = datasets.CIFAR10(root=dataset_path, train=True, download=True)
     num_training_points = train_set.__len__()
@@ -93,7 +97,6 @@ def get_cifar10_loaders(dataset_path, batch_size):
 
     train_data = np.array([]).reshape(0, 3, 32, 32)
 
-    data_batch_name = 'cifar-10-batches-py/data_batch_{}'
     for batch_num in range(1, 6):
         data_batch = data_batch_name.format(batch_num)
         batch_dir = os.path.join(dataset_path, data_batch)
