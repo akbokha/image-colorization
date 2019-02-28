@@ -33,13 +33,13 @@ def main(options):
 
     # Create data loaders
     if options.dataset_name == 'placeholder':
-        train_loader, val_loader = get_placeholder_loaders(options.dataset_path, options.batch_size)
+        train_loader, val_loader = get_placeholder_loaders(options.dataset_path, options.train_batch_size, options.val_batch_size)
     elif options.dataset_name == 'cifar10':
-        train_loader, val_loader = get_cifar10_loaders(options.dataset_path, options.batch_size)
+        train_loader, val_loader = get_cifar10_loaders(options.dataset_path, options.train_batch_size, options.val_batch_size)
     elif options.dataset_name == 'places205':
-        train_loader, val_loader = get_places205_loaders(options.dataset_path, options.batch_size)
+        train_loader, val_loader = get_places205_loaders(options.dataset_path, options.train_batch_size, options.val_batch_size)
     elif options.dataset_name == 'places365':
-        train_loader, val_loader = get_places365_loaders(options.dataset_path, options.batch_size)
+        train_loader, val_loader = get_places365_loaders(options.dataset_path, options.train_batch_size, options.val_batch_size)
 
     # Check if specified model is one that is supported by experimentation framework
     if options.model_name not in model_names:
