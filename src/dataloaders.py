@@ -90,8 +90,6 @@ def get_cifar10_loaders(dataset_path, train_batch_size, val_batch_size):
     ])
 
     train_set = datasets.CIFAR10(root=dataset_path, train=True, download=True)
-    num_training_points = train_set.__len__()
-    num_points_training_batch = int(num_training_points / train_batch_size)
 
     train_data = np.array([]).reshape(0, 3, 32, 32)
 
