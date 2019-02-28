@@ -88,8 +88,9 @@ def get_cifar10_loaders(dataset_path, train_batch_size, val_batch_size):
     train_transforms = transforms.Compose([
         transforms.RandomHorizontalFlip()
     ])
-
-    train_set = datasets.CIFAR10(root=dataset_path, train=True, download=True)
+    
+    # Used to download the data
+    datasets.CIFAR10(root=dataset_path, train=True, download=True)
 
     train_data = np.array([]).reshape(0, 3, 32, 32)
 
