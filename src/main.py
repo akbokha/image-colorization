@@ -11,7 +11,7 @@ from .models import *
 from .options import ModelOptions
 from .utils import *
 
-dataset_names = ['placeholder', 'cifar10', 'places205']]
+dataset_names = ['placeholder', 'cifar10', 'places205', 'places365']
 model_names = ['resnet', 'unet32']
 
 def main(options):
@@ -33,11 +33,13 @@ def main(options):
 
     # Create data loaders
     if options.dataset_name == 'placeholder':
-        train_loader, val_loader = get_placeholder_loaders(options.dataset_path, options.batch_size)
+        train_loader, val_loader = get_placeholder_loaders(options.dataset_path, options.train_batch_size, options.val_batch_size)
     elif options.dataset_name == 'cifar10':
-        train_loader, val_loader = get_cifar10_loaders(options.dataset_path, options.batch_size)
+        train_loader, val_loader = get_cifar10_loaders(options.dataset_path, options.train_batch_size, options.val_batch_size)
     elif options.dataset_name == 'places205':
-        train_loader, val_loader = get_places_loaders(options.dataset_path, options.batch_size)
+        train_loader, val_loader = get_places205_loaders(options.dataset_path, options.train_batch_size, options.val_batch_size)
+    elif options.dataset_name == 'places365':
+        train_loader, val_loader = get_places365_loaders(options.dataset_path, options.train_batch_size, options.val_batch_size)
 
     # Check if specified model is one that is supported by experimentation framework
     if options.model_name not in model_names:
@@ -123,7 +125,7 @@ def train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available,
                   'Time {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
                   'Data {data_times.val:.3f} ({data_times.avg:.3f})\t'
                   'Loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t'.format(
-                epoch, i, len(train_loader), batch_times=batch_times,
+                epoch, i+1, len(train_loader), batch_times=batch_times,
                 data_times=data_times, loss_values=loss_values))
 
     print('Finished training epoch {}'.format(epoch))
@@ -198,7 +200,7 @@ def validate_epoch(epoch, val_loader, model, criterion, save_images, gpu_availab
             print('Validate: [{0}/{1}]\t'
                   'Time {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
                   'Loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t'.format(
-                i, len(val_loader), batch_times=batch_times, loss_values=loss_values))
+                i+1, len(val_loader), batch_times=batch_times, loss_values=loss_values))
 
     print('Finished validation.')
 
