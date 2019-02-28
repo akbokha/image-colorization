@@ -20,8 +20,8 @@ EXTRACTED_PATH = 'places365_standard'
 OUTPUT_PATH = 'places365'
 TRAIN_PATH = os.path.join(OUTPUT_PATH, 'train')
 TEST_PATH = os.path.join(OUTPUT_PATH, 'test')
-TRAIN_EXAMPLES_PER_CLASS = 1001
-TEST_EXAMPLES_PER_CLASS = 101
+TRAIN_EXAMPLES_PER_CLASS = 1000
+TEST_EXAMPLES_PER_CLASS = 100
 
 print('Downloading TAR archive from {0}'.format(URL))
 
