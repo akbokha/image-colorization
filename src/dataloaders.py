@@ -175,7 +175,7 @@ def get_places205_loaders(dataset_path, train_batch_size, val_batch_size):
     return train_loader, val_loader
 
 
-def get_places365_loaders(dataset_path, train_batch_size, val_batch_size):
+def get_places365_loaders(dataset_path, train_batch_size, val_batch_size, for_classification=False):
     """
     Get Places365 dataset loaders
     """
@@ -184,16 +184,25 @@ def get_places365_loaders(dataset_path, train_batch_size, val_batch_size):
     val_directory = os.path.join(dataset_path, 'val')
 
     train_transforms = get_224_train_transforms()
-    train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
+    if for_classification:
+        train_imagefolder = datasets.ImageFolder(train_directory, train_transforms)
+    else:
+        train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
+
     train_loader = torch.utils.data.DataLoader(
         train_imagefolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
 
     val_transforms = get_224_val_transforms()
-    val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
+    if for_classification:
+        val_imagefolder = datasets.ImageFolder(val_directory, train_transforms)
+    else:
+        val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
+
     val_loader = torch.utils.data.DataLoader(
         val_imagefolder, batch_size=val_batch_size, shuffle=False, num_workers=1)
 
     return train_loader, val_loader
+
 
 
 class GrayscaleImageFolder(datasets.ImageFolder):

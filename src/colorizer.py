@@ -25,8 +25,8 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
     for epoch in range(options.max_epochs):
         train_time, train_loss = train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options)
         val_loss = validate_colorizer_epoch(epoch, val_loader, model, criterion, True, gpu_available, options)
-        save_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options)
-        save_model_state(epoch, model, optimizer, options)
+        save_epoch_stats(epoch, epoch_stats, train_time, train_loss, val_loss, options.experiment_output_path)
+        save_model_state(epoch, model, optimizer, options.experiment_output_path)
 
 
 def train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options):
@@ -47,7 +47,8 @@ def train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer, gpu_
     for i, (input_gray, input_ab, img_original) in enumerate(train_loader):
 
         # Use GPU if available
-        if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
+        if gpu_available:
+            input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
@@ -113,7 +114,8 @@ def validate_colorizer_epoch(epoch, val_loader, model, criterion, save_images, g
     for i, (input_gray, input_ab, img_original) in enumerate(val_loader):
 
         # Use GPU if available
-        if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
+        if gpu_available:
+            input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
@@ -157,22 +159,9 @@ def validate_colorizer_epoch(epoch, val_loader, model, criterion, save_images, g
     return loss_values.avg
 
 
-def save_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options):
+def save_epoch_stats(epoch, epoch_stats, train_time, train_loss, val_loss, path):
     epoch_stats['epoch'].append(epoch)
     epoch_stats['train_time'].append(train_time)
     epoch_stats['train_loss'].append(train_loss)
     epoch_stats['val_loss'].append(val_loss)
-    save_stats(options.experiment_output_path, 'train_stats.csv', epoch_stats, epoch)
-
-
-def save_model_state(epoch, model, optimizer, options):
-    model_state_path = os.path.join(options.experiment_output_path, 'models', 'epoch-{0:03d}'.format(epoch))
-    if not os.path.exists(model_state_path):
-        os.makedirs(model_state_path)
-
-    state_dict = {
-        'epoch': epoch,
-        'model_state': model.state_dict(),
-        'optimizer_state': optimizer.state_dict(),
-    }
-    torch.save(state_dict, os.path.join(model_state_path, 'state_dict.pth'))
+    save_stats(path, 'train_stats.csv', epoch_stats, epoch)
