@@ -47,8 +47,6 @@ def train_classifier(gpu_available, options, train_loader, val_loader):
         save_epoch_stats(epoch, epoch_stats, train_time, train_loss, val_loss, options.experiment_output_path)
         save_model_state(epoch, model, optimizer, options.experiment_output_path)
 
-    # TODO save best model weights
-
 
 def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer, scheduler, gpu_available, options):
 

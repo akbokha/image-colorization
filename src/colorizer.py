@@ -122,8 +122,9 @@ def validate_colorizer_epoch(epoch, val_loader, model, criterion, save_images, g
         start_time = time.time()
 
         # Run forward pass
-        output_ab = model(input_gray)
-        loss = criterion(output_ab, input_ab)
+        with torch.no_grad():
+            output_ab = model(input_gray)
+            loss = criterion(output_ab, input_ab)
 
         # Record loss and measure accuracy
         loss_values.update(loss.item(), input_gray.size(0))

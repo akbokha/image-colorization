@@ -69,20 +69,29 @@ def get_224_val_transforms(for_classification=False):
     return transforms.Compose(transform_list)
 
 
-def get_placeholder_loaders(placeholder_path, train_batch_size, val_batch_size):
+def get_placeholder_loaders(dataset_path, train_batch_size, val_batch_size, for_classification=True):
     """
     Get placeholder data set loaders (for framework testing only)
     """
 
-    train_directory = os.path.join(placeholder_path, 'train')
-    train_transforms = get_224_train_transforms()
-    train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
+    train_directory = os.path.join(dataset_path, 'train')
+    val_directory = os.path.join(dataset_path, 'val')
+
+    train_transforms = get_224_train_transforms(for_classification)
+    if for_classification:
+        train_imagefolder = datasets.ImageFolder(train_directory, train_transforms)
+    else:
+        train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
+
     train_loader = torch.utils.data.DataLoader(
         train_imagefolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
 
-    val_transforms = get_224_val_transforms()
-    val_directory = os.path.join(placeholder_path, 'val')
-    val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
+    val_transforms = get_224_val_transforms(for_classification)
+    if for_classification:
+        val_imagefolder = datasets.ImageFolder(val_directory, train_transforms)
+    else:
+        val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
+
     val_loader = torch.utils.data.DataLoader(
         val_imagefolder, batch_size=val_batch_size, shuffle=False, num_workers=1)
 
