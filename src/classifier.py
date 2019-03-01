@@ -19,7 +19,7 @@ def build_vgg16_model(model_root_path, num_classes):
     # Alter classifier architecture
     num_features = vgg16_model.classifier[6].in_features
     features = list(vgg16_model.classifier.children())[:-1]  # Remove last layer
-    features.extend([nn.Linear(num_features, num_classes)])  # Add our layer with 4 outputs
+    features.extend([nn.Linear(num_features, num_classes)])
     vgg16_model.classifier = nn.Sequential(*features)  # Replace the model classifier
 
     model = models.vgg16(pretrained=False)
@@ -39,12 +39,20 @@ def train_classifier(gpu_available, options, train_loader, val_loader):
     if gpu_available:
         model = model.cuda()
 
-    epoch_stats = {"epoch": [], "train_time": [], "train_loss": [], 'val_loss': []}
+    epoch_stats = {
+        "epoch": [],
+        "train_time": [],
+        "train_loss": [],
+        "train_acc": [],
+        "val_loss": [],
+        "val_acc": []
+    }
 
     for epoch in range(options.max_epochs):
-        train_time, train_loss, val_loss = train_val_epoch(
+        train_time, train_loss, train_acc, val_loss, val_acc = train_val_epoch(
             epoch, train_loader, val_loader, criterion, model, optimizer, scheduler, gpu_available, options)
-        save_epoch_stats(epoch, epoch_stats, train_time, train_loss, val_loss, options.experiment_output_path)
+        save_epoch_stats(
+            epoch, epoch_stats, train_time, train_loss, train_acc, val_loss, val_acc, options.experiment_output_path)
         save_model_state(epoch, model, optimizer, options.experiment_output_path)
 
 
@@ -62,11 +70,12 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
             print('Starting validation epoch {}'.format(epoch))
 
         # Prepare value counters and timers
-        batch_times, data_times, loss_values = AverageMeter(), AverageMeter(), AverageMeter()
+        batch_times, data_times = AverageMeter(), AverageMeter()
+        loss_values, acc_counts = AverageMeter(), RateMeter()
 
         start_time = time.time()
         if phase == 'train':
-            loader =  train_loader
+            loader = train_loader
         else:
             loader = val_loader
 
@@ -89,9 +98,11 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
                 outputs = model(inputs)
                 _, preds = torch.max(outputs, 1)
                 loss = criterion(outputs, labels)
+                acc = torch.sum(preds == labels.data).item()
 
                 # Record loss and measure accuracy
                 loss_values.update(loss.item(), inputs.size(0))
+                acc_counts.update(acc, inputs.size(0))
 
                 # backward + optimize only if in training phase
                 if phase == 'train':
@@ -105,26 +116,31 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
             # Print stats -- in the code below, val refers to value, not validation
             if i % options.batch_output_frequency == 0:
                 print('Epoch: [{0}][{1}/{2}]\t'
-                      'Time {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
-                      'Data {data_times.val:.3f} ({data_times.avg:.3f})\t'
-                      'Loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t'.format(
+                      'data {data_times.val:.3f} ({data_times.avg:.3f})\t'
+                      'proc {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
+                      'loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t'
+                      'acc {acc_counts.avg:.4f}'.format(
                     epoch, i + 1, len(train_loader), batch_times=batch_times,
-                    data_times=data_times, loss_values=loss_values))
+                    data_times=data_times, loss_values=loss_values, acc_counts=acc_counts))
 
         if phase == 'train':
             print('Finished training epoch {}'.format(epoch))
             epoch_train_time = batch_times.sum + data_times.sum
             epoch_train_loss = loss_values.avg
+            epoch_train_acc = acc_counts.avg
         else:
             print('Finished validation epoch {}'.format(epoch))
             epoch_val_loss = loss_values.avg
+            epoch_val_acc = acc_counts.avg
 
-    return epoch_train_time, epoch_train_loss, epoch_val_loss
+    return epoch_train_time, epoch_train_loss, epoch_train_acc, epoch_val_loss, epoch_val_acc
 
 
-def save_epoch_stats(epoch, epoch_stats, train_time, train_loss, val_loss, path):
+def save_epoch_stats(epoch, epoch_stats, train_time, train_loss, train_acc, val_loss, val_acc, path):
     epoch_stats['epoch'].append(epoch)
     epoch_stats['train_time'].append(train_time)
     epoch_stats['train_loss'].append(train_loss)
+    epoch_stats['train_acc'].append(train_acc)
     epoch_stats['val_loss'].append(val_loss)
+    epoch_stats['val_acc'].append(val_acc)
     save_stats(path, 'train_stats.csv', epoch_stats, epoch)

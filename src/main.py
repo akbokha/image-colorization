@@ -76,7 +76,7 @@ def main(options):
         if options.dataset_name == 'placeholder':
             train_loader, val_loader = get_placeholder_loaders(
                 options.dataset_path, options.train_batch_size, options.val_batch_size, for_classification=True)
-            options.dataset_num_classes = 1
+            options.dataset_num_classes = 2
 
         elif options.dataset_name == 'places365':
             train_loader, val_loader = get_places365_loaders(
