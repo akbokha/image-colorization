@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
-#SBATCH --partition=Standard
+#SBATCH --partition=Short
 #SBATCH --gres=gpu:4
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-08:00:00
+#SBATCH --time=0-03:59:00
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -28,10 +28,10 @@ mkdir -p /disk/scratch/${STUDENT_ID}
 export TMPDIR=/disk/scratch/${STUDENT_ID}/
 export TMP=/disk/scratch/${STUDENT_ID}/
 
-mkdir -p ${TMP}/datasets/
-export DATASET_DIR=${TMP}/datasets/
+mkdir -p ${TMP}/data/
+rsync -ua /home/${STUDENT_ID}/image-colorization/data/ ${TMP}/data/
+export DATASET_DIR=${TMP}/data/
+
 # Activate the relevant virtual environment:
-
-
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
-python train.py --model=unet32 --dataset-name=cifar10 --batch-size=100 --batch-output-frequency=10
+python /home/${STUDENT_ID}/image-colorization/train.py --experiment-name=experiment_001 --model=unet32 --dataset-name=cifar10 --train-batch-size=100 --val-batch-size=1000 --batch-output-frequency=10 --max-images=10
