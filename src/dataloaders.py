@@ -45,18 +45,28 @@ def unpickle(file):
     return dict[b"data"]
 
 
-def get_224_train_transforms():
-    return transforms.Compose([
+def get_224_train_transforms(for_classification=False):
+    transform_list = [
         transforms.RandomSizedCrop(224),
         transforms.RandomHorizontalFlip()
-    ])
+    ]
+
+    if for_classification:
+        transform_list.append(transforms.ToTensor())
+
+    return transforms.Compose(transform_list)
 
 
-def get_224_val_transforms():
-    return transforms.Compose([
+def get_224_val_transforms(for_classification=False):
+    transform_list = [
         transforms.Scale(256),
         transforms.CenterCrop(224)
-    ])
+    ]
+
+    if for_classification:
+        transform_list.append(transforms.ToTensor())
+
+    return transforms.Compose(transform_list)
 
 
 def get_placeholder_loaders(placeholder_path, train_batch_size, val_batch_size):
@@ -183,7 +193,7 @@ def get_places365_loaders(dataset_path, train_batch_size, val_batch_size, for_cl
     train_directory = os.path.join(dataset_path, 'train')
     val_directory = os.path.join(dataset_path, 'val')
 
-    train_transforms = get_224_train_transforms()
+    train_transforms = get_224_train_transforms(for_classification)
     if for_classification:
         train_imagefolder = datasets.ImageFolder(train_directory, train_transforms)
     else:
@@ -192,7 +202,7 @@ def get_places365_loaders(dataset_path, train_batch_size, val_batch_size, for_cl
     train_loader = torch.utils.data.DataLoader(
         train_imagefolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
 
-    val_transforms = get_224_val_transforms()
+    val_transforms = get_224_val_transforms(for_classification)
     if for_classification:
         val_imagefolder = datasets.ImageFolder(val_directory, train_transforms)
     else:

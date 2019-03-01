@@ -22,6 +22,9 @@ def build_vgg16_model(model_root_path, num_classes):
     features.extend([nn.Linear(num_features, num_classes)])  # Add our layer with 4 outputs
     vgg16_model.classifier = nn.Sequential(*features)  # Replace the model classifier
 
+    model = models.vgg16(pretrained=False)
+    model.classifier[-1] = nn.Linear(in_features=4096, out_features=num_classes)
+
     return vgg16_model
 
 
@@ -40,14 +43,14 @@ def train_classifier(gpu_available, options, train_loader, val_loader):
 
     for epoch in range(options.max_epochs):
         train_time, train_loss, val_loss = train_val_epoch(
-            epoch, train_loader, val_loader, criterion, model, optimizer, scheduler)
+            epoch, train_loader, val_loader, criterion, model, optimizer, scheduler, gpu_available, options)
         save_epoch_stats(epoch, epoch_stats, train_time, train_loss, val_loss, options.experiment_output_path)
         save_model_state(epoch, model, optimizer, options.experiment_output_path)
 
     # TODO save best model weights
 
 
-def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer, scheduler):
+def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer, scheduler, gpu_available, options):
 
     # Each epoch has a training and validation phase
     for phase in ['train', 'val']:
@@ -88,6 +91,9 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
                 outputs = model(inputs)
                 _, preds = torch.max(outputs, 1)
                 loss = criterion(outputs, labels)
+
+                # Record loss and measure accuracy
+                loss_values.update(loss.item(), inputs.size(0))
 
                 # backward + optimize only if in training phase
                 if phase == 'train':
