@@ -39,7 +39,7 @@ def download_data(url, file, dataset_path, num_files=None):
     return True
 
 
-def unpickle(file):
+def unpickle_cifar10(file):
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict[b"data"]
@@ -88,13 +88,20 @@ def get_cifar10_loaders(dataset_path, train_batch_size, val_batch_size):
     train_transforms = transforms.Compose([
         transforms.RandomHorizontalFlip()
     ])
+
+    # Print if data is already downloaded
+    data_batch_name = 'cifar-10-batches-py/data_batch_{}'
+    for batch_num in range(1, 6):
+        data_batch = data_batch_name.format(batch_num)
+        data_file = os.path.join(dataset_path, data_batch)
+        if os.path.exists(data_file):
+            print("Batch {0} present".format(batch_num))
     
     # Used to download the data
     datasets.CIFAR10(root=dataset_path, train=True, download=True)
 
     train_data = np.array([]).reshape(0, 3, 32, 32)
 
-    data_batch_name = 'cifar-10-batches-py/data_batch_{}'
     for batch_num in range(1, 6):
         data_batch = data_batch_name.format(batch_num)
         batch_dir = os.path.join(dataset_path, data_batch)
@@ -112,7 +119,7 @@ def get_cifar10_loaders(dataset_path, train_batch_size, val_batch_size):
 
     val_set_name = 'cifar-10-batches-py/test_batch'
     val_dir = os.path.join(dataset_path, val_set_name)
-    val_data = unpickle(val_dir)
+    val_data = unpickle_cifar10(val_dir)
     num_points_val_batch = val_data.shape[0]
 
     val_data = np.reshape(val_data, (num_points_val_batch, 3, 32, 32))
