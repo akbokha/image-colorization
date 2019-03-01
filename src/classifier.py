@@ -71,7 +71,7 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
 
         # Prepare value counters and timers
         batch_times, data_times = AverageMeter(), AverageMeter()
-        loss_values, acc_counts = AverageMeter(), RateMeter()
+        loss_values, acc_rate = AverageMeter(), RateMeter()
 
         start_time = time.time()
         if phase == 'train':
@@ -98,11 +98,11 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
                 outputs = model(inputs)
                 _, preds = torch.max(outputs, 1)
                 loss = criterion(outputs, labels)
-                acc = torch.sum(preds == labels.data).item()
+                correct = torch.sum(preds == labels.data).item()
 
                 # Record loss and measure accuracy
                 loss_values.update(loss.item(), inputs.size(0))
-                acc_counts.update(acc, inputs.size(0))
+                acc_rate.update(correct, inputs.size(0))
 
                 # backward + optimize only if in training phase
                 if phase == 'train':
@@ -119,19 +119,19 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
                       'data {data_times.val:.3f} ({data_times.avg:.3f})\t'
                       'proc {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
                       'loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t'
-                      'acc {acc_counts.avg:.4f}'.format(
+                      'acc ({acc_rate.avg:.4f})'.format(
                     epoch, i + 1, len(train_loader), batch_times=batch_times,
-                    data_times=data_times, loss_values=loss_values, acc_counts=acc_counts))
+                    data_times=data_times, loss_values=loss_values, acc_rate=acc_rate))
 
         if phase == 'train':
             print('Finished training epoch {}'.format(epoch))
             epoch_train_time = batch_times.sum + data_times.sum
             epoch_train_loss = loss_values.avg
-            epoch_train_acc = acc_counts.avg
+            epoch_train_acc = acc_rate.avg
         else:
             print('Finished validation epoch {}'.format(epoch))
             epoch_val_loss = loss_values.avg
-            epoch_val_acc = acc_counts.avg
+            epoch_val_acc = acc_rate.avg
 
     return epoch_train_time, epoch_train_loss, epoch_train_acc, epoch_val_loss, epoch_val_acc
 
