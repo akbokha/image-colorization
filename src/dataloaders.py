@@ -69,7 +69,7 @@ def get_224_val_transforms(for_classification=False):
     return transforms.Compose(transform_list)
 
 
-def get_placeholder_loaders(dataset_path, train_batch_size, val_batch_size, for_classification=True):
+def get_placeholder_loaders(dataset_path, train_batch_size, val_batch_size, for_classification=False):
     """
     Get placeholder data set loaders (for framework testing only)
     """
