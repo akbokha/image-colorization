@@ -261,6 +261,7 @@ def train_GAN_epoch(epoch, train_loader, gen_model, dis_model, criterion, l1_los
     gen_model.train()
     dis_model.train()
 
+    # Labels that are used by the discriminator to classify real and generated samples
     REAL = 1
     GENERATED = 0
 
@@ -271,6 +272,7 @@ def train_GAN_epoch(epoch, train_loader, gen_model, dis_model, criterion, l1_los
         # Use GPU if available
         if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
+        # convert to FloatTensor since thnn_conv2d_forward is not implemented for type torch.ByteTensor
         img_original = img_original.type('torch.FloatTensor')
 
         # Record time to load data (above)
@@ -360,6 +362,7 @@ def validate_GAN_epoch(epoch, val_loader, gen_model, dis_model, criterion, l1_lo
     gen_model.eval()
     dis_model.eval()
 
+    # Labels that are used by the discriminator to classify real and generated samples
     REAL = 1
     GENERATED = 0
 
@@ -372,6 +375,7 @@ def validate_GAN_epoch(epoch, val_loader, gen_model, dis_model, criterion, l1_lo
         # Use GPU if available
         if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
+        # convert to FloatTensor since thnn_conv2d_forward is not implemented for type torch.ByteTensor
         img_original = img_original.type('torch.FloatTensor')
 
         # Record time to load data (above)
