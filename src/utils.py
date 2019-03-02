@@ -59,7 +59,8 @@ def save_stats(experiment_log_dir, filename, stats_dict, current_epoch, continue
     return summary_filename
 
 
-def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, save_name, save_static_images=False):
+def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, save_name, save_static_images=False,
+                          gan_result=False, generated=None):
     """
     Save grayscale and colorised versions of selected image
     """
@@ -67,6 +68,10 @@ def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, 
         grayscale_input = grayscale_layer.squeeze().numpy()
         plt.imsave(arr=grayscale_input, fname=os.path.join(save_paths['grayscale'], save_name), cmap='gray')
         plt.imsave(arr=img_original.numpy().transpose((1, 2, 0)), fname=os.path.join(save_paths['original'], save_name))
+    elif gan_result:
+        generated = generated.numpy().astype(np.float64)
+        generated = generated.transpose((1, 2, 0))  # rescale for matplotlib
+        plt.imsave(arr=generated, fname=os.path.join(save_paths['colorized'], save_name))
     else:  # save colorization results
         color_image = torch.cat((grayscale_layer, ab_layers), 0).numpy()  # combine channels
         color_image = color_image.transpose((1, 2, 0))  # rescale for matplotlib
@@ -74,4 +79,3 @@ def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, 
         color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
         color_image = lab2rgb(color_image.astype(np.float64))
         plt.imsave(arr=color_image, fname=os.path.join(save_paths['colorized'], save_name))
-

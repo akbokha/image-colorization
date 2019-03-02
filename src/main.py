@@ -85,6 +85,11 @@ def main(options):
             'discriminator': optimizer_dis
         }
 
+        models = {
+            'generator': model_gen,
+            'discriminator': model_dis
+        }
+
         criterion = nn.BCELoss().cuda() if gpu_available else nn.BCELoss()
         l1_loss = nn.L1Loss().cuda() if gpu_available else nn.L1Loss()
 
@@ -97,7 +102,7 @@ def main(options):
             val_loss = validate_GAN_epoch(epoch, val_loader, model_gen, model_dis, criterion, l1_loss, l1_weight, True,
                                       gpu_available, options)
             state_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options)
-            save_model_state(epoch, model, optimizers, options)
+            save_model_state(epoch, models, optimizers, options)
 
     else:  # resnet or u-net
         # Make model use gpu if available
@@ -422,16 +427,16 @@ def validate_GAN_epoch(epoch, val_loader, gen_model, dis_model, criterion, l1_lo
         if save_images and num_images_saved < options.max_images:
             for j in range(min(len(output), options.max_images - num_images_saved)):
                 gray_layer = input_gray[j].detach().cpu()
-                ab_layers = output[j].detach().cpu()
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
                 # save gray-scale image and respective ground-truth images after first epoch
                 if epoch == 0:
                     img_original = img_original.type('torch.ByteTensor')
-                    save_colorized_images(gray_layer, ab_layers, generated[j],
+                    save_colorized_images(gray_layer, None, img_original[j],
                                           save_paths=image_output_paths, save_name=save_name, save_static_images=True)
                 # save colorizations after every epoch
-                save_colorized_images(gray_layer, ab_layers, generated[j],
-                                      save_paths=image_output_paths, save_name=save_name)
+                save_colorized_images(gray_layer, None, img_original[j],
+                                      save_paths=image_output_paths, save_name=save_name, gan_result=True,
+                                      generated=generated[j])
                 num_images_saved += 1
 
         # Record time to do forward passes and save images
@@ -466,7 +471,8 @@ def save_model_state(epoch, model, optimizer, options):
     if isinstance(optimizer, dict):
         state_dict = {
             'epoch': epoch,
-            'model_state': model.state_dict(),
+            'gen_model_state': model['generator'].state_dict(),
+            'dis_model_state': model['discriminator'].state_dict(),
             'gen_optimizer_state': optimizer['generator'].state_dict(),
             'dis_optimizer_state': optimizer['discriminator'].state_dict()
         }
