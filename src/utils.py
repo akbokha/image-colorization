@@ -25,6 +25,22 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
 
+class RateMeter(object):
+    '''An easy way to compute and store rates'''
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.avg = 0
+        self.successes = 0
+        self.trials = 0
+
+    def update(self, successes, trials):
+        self.successes += successes
+        self.trials += trials
+        self.avg = self.successes / self.trials
+
 
 def save_model_state(epoch, model, optimizer, path):
     model_state_path = os.path.join(path, 'models', 'epoch-{0:03d}'.format(epoch))
