@@ -224,6 +224,8 @@ class GrayscaleImageFolder(datasets.ImageFolder):
             img_gray = rgb2gray(img_original)
             img_gray = torch.from_numpy(img_gray).unsqueeze(0).float()
 
+            img_original = torch.from_numpy(img_original.transpose((2, 0, 1)))
+
         return img_gray, img_ab, img_original
 
 

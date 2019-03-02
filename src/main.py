@@ -94,7 +94,7 @@ def main(options):
         for epoch in range(options.max_epochs):
             train_time, train_loss = train_GAN_epoch(epoch, train_loader, model_gen, model_dis, criterion, l1_loss,
                                                      l1_weight, optimizers, gpu_available, options)
-            val_loss = validate_epoch(epoch, val_loader, model_gen, model_dis, criterion, l1_loss, l1_weight, True,
+            val_loss = validate_GAN_epoch(epoch, val_loader, model_gen, model_dis, criterion, l1_loss, l1_weight, True,
                                       gpu_available, options)
             state_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options)
             save_model_state(epoch, model, optimizers, options)
@@ -271,6 +271,8 @@ def train_GAN_epoch(epoch, train_loader, gen_model, dis_model, criterion, l1_los
         # Use GPU if available
         if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
+        img_original = img_original.type('torch.FloatTensor')
+
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
         start_time = time.time()
@@ -292,10 +294,10 @@ def train_GAN_epoch(epoch, train_loader, gen_model, dis_model, criterion, l1_los
 
         # Train with generated examples
         generated_examples = gen_model(input_gray)
-        dis_output = dis_model(generated_examples.detach())
+        output = dis_model(generated_examples.detach())
         label = label.fill_(GENERATED)  # replace with zeroes
 
-        dis_err_gen = criterion(torch.squeeze(dis_output), label)
+        dis_err_gen = criterion(torch.squeeze(output), label)
         dis_err_gen.backward()
 
         dis_error = dis_err_real + dis_err_gen
@@ -306,7 +308,7 @@ def train_GAN_epoch(epoch, train_loader, gen_model, dis_model, criterion, l1_los
         """
         gen_model.zero_grad()
         label = label.fill_(REAL)  # replace with ones
-        output = dis_model()
+        output = dis_model(generated_examples)
         gen_err_g = criterion(torch.squeeze(output), label)
         gen_err_loss = l1_loss(generated_examples.view(generated_examples.size(0), -1),
                                img_original.view(img_original.size(0), -1)) * l1_weight
@@ -370,6 +372,8 @@ def validate_GAN_epoch(epoch, val_loader, gen_model, dis_model, criterion, l1_lo
         # Use GPU if available
         if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
+        img_original = img_original.type('torch.FloatTensor')
+
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
         start_time = time.time()
@@ -418,10 +422,11 @@ def validate_GAN_epoch(epoch, val_loader, gen_model, dis_model, criterion, l1_lo
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
                 # save gray-scale image and respective ground-truth images after first epoch
                 if epoch == 0:
-                    save_colorized_images(gray_layer, ab_layers, img_original[j],
+                    img_original = img_original.type('torch.ByteTensor')
+                    save_colorized_images(gray_layer, ab_layers, generated[j],
                                           save_paths=image_output_paths, save_name=save_name, save_static_images=True)
                 # save colorizations after every epoch
-                save_colorized_images(gray_layer, ab_layers, img_original[j],
+                save_colorized_images(gray_layer, ab_layers, generated[j],
                                       save_paths=image_output_paths, save_name=save_name)
                 num_images_saved += 1
 

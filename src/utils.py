@@ -66,7 +66,7 @@ def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, 
     if save_static_images:  # save non-changing gray-scale and ground_truth images
         grayscale_input = grayscale_layer.squeeze().numpy()
         plt.imsave(arr=grayscale_input, fname=os.path.join(save_paths['grayscale'], save_name), cmap='gray')
-        plt.imsave(arr=img_original.cpu(), fname=os.path.join(save_paths['original'], save_name))
+        plt.imsave(arr=img_original.numpy().transpose((1, 2, 0)), fname=os.path.join(save_paths['original'], save_name))
     else:  # save colorization results
         color_image = torch.cat((grayscale_layer, ab_layers), 0).numpy()  # combine channels
         color_image = color_image.transpose((1, 2, 0))  # rescale for matplotlib
