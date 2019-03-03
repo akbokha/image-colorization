@@ -12,7 +12,7 @@ from .options import ModelOptions
 from .utils import *
 
 dataset_names = ['placeholder', 'cifar10', 'places205', 'places365']
-model_names = ['resnet', 'unet32']
+model_names = ['resnet', 'unet32', 'unet224']
 
 def main(options):
     # initialize random seed
@@ -20,7 +20,7 @@ def main(options):
     np.random.seed(options.seed)
     torch.manual_seed(options.seed)
     
-    gpu_available = torch.cuda.is_available()
+    gpu_available = False#torch.cuda.is_available()
 
     # Create output directory
     if not os.path.exists(options.experiment_output_path):
@@ -51,6 +51,8 @@ def main(options):
         model = ResNetColorizationNet()
     if options.model_name == 'unet32':
         model = UNet32()
+    if options.model_name == 'unet224':
+        model = UNet224()
     
     # Make model use gpu if available
     if gpu_available:

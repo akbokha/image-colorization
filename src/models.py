@@ -122,11 +122,11 @@ class UNet224(nn.Module):
         self.deconv2 = nn.ConvTranspose2d(1024, 512, (4, 4), stride=1, padding=1) # i = 5, o = 7
         self.deconv3 = nn.ConvTranspose2d(1024, 512, (4, 4), stride=2, padding=1) # i = 7, o = 14
         self.deconv4 = nn.ConvTranspose2d(1024, 256, (4, 4), stride=2, padding=1) # i = 14, o = 28
-        self.deconv2 = nn.ConvTranspose2d(512, 128, (4, 4), stride=2, padding=1)  # i = 28, o = 56
-        self.deconv3 = nn.ConvTranspose2d(256, 64, (4, 4), stride=2, padding=1)   # i = 56, o = 112
-        self.deconv4 = nn.ConvTranspose2d(128, 64, (4, 4), stride=2, padding=1)   # i = 112, o = 224
+        self.deconv5 = nn.ConvTranspose2d(512, 128, (4, 4), stride=2, padding=1)  # i = 28, o = 56
+        self.deconv6 = nn.ConvTranspose2d(256, 64, (4, 4), stride=2, padding=1)   # i = 56, o = 112
+        self.deconv7 = nn.ConvTranspose2d(128, 64, (4, 4), stride=2, padding=1)   # i = 112, o = 224
         
-        self.conv5 = nn.Conv2d(64, 2, (1, 1))
+        self.conv8 = nn.Conv2d(64, 2, (1, 1))
         
         # RESUME HERE!!!
         
@@ -135,45 +135,72 @@ class UNet224(nn.Module):
         self.conv2_bnorm = nn.BatchNorm2d(128)
         self.conv3_bnorm = nn.BatchNorm2d(256)
         self.conv4_bnorm = nn.BatchNorm2d(512)
+        self.conv5_bnorm = nn.BatchNorm2d(512)
+        self.conv6_bnorm = nn.BatchNorm2d(512)
+        self.conv7_bnorm = nn.BatchNorm2d(512)
         
-        self.deconv1_bnorm = nn.BatchNorm2d(256)
-        self.deconv2_bnorm = nn.BatchNorm2d(128)
-        self.deconv3_bnorm = nn.BatchNorm2d(64)
-        self.deconv4_bnorm = nn.BatchNorm2d(64)
+        self.deconv1_bnorm = nn.BatchNorm2d(512)
+        self.deconv2_bnorm = nn.BatchNorm2d(512)
+        self.deconv3_bnorm = nn.BatchNorm2d(512)
+        self.deconv4_bnorm = nn.BatchNorm2d(256)
+        self.deconv5_bnorm = nn.BatchNorm2d(128)
+        self.deconv6_bnorm = nn.BatchNorm2d(64)
+        self.deconv7_bnorm = nn.BatchNorm2d(64)
     
-    def forward(self, x32):
+    def forward(self, x224):
         # Contraction
-        x16 = F.leaky_relu(self.conv1(x32), 0.2)
-        x16 = self.conv1_bnorm(x16)
+        x112 = F.leaky_relu(self.conv1(x224), 0.2)
+        x112 = self.conv1_bnorm(x112)
         
-        x8 = F.leaky_relu(self.conv2(x16), 0.2)
-        x8 = self.conv2_bnorm(x8)
+        x56 = F.leaky_relu(self.conv2(x112), 0.2)
+        x56 = self.conv2_bnorm(x56)
         
-        x4 = F.leaky_relu(self.conv3(x8), 0.2)
-        x4 = self.conv3_bnorm(x4)
+        x28 = F.leaky_relu(self.conv3(x56), 0.2)
+        x28 = self.conv3_bnorm(x28)
         
-        x2 = F.leaky_relu(self.conv4(x4), 0.2)
-        x2 = self.conv4_bnorm(x2)
+        x14 = F.leaky_relu(self.conv4(x28), 0.2)
+        x14 = self.conv4_bnorm(x14)
         
+        x7 = F.leaky_relu(self.conv5(x14), 0.2)
+        x7 = self.conv5_bnorm(x7)
+        
+        x5 = F.leaky_relu(self.conv6(x7), 0.2)
+        x5 = self.conv6_bnorm(x5)
+        
+        x3 = F.leaky_relu(self.conv7(x5), 0.2)
+        x3 = self.conv7_bnorm(x3)
         
         # Expansion
-        x = F.relu(self.deconv1(x2))
+        x = F.relu(self.deconv1(x3))
         x = self.deconv1_bnorm(x)
-        x4 = torch.cat((x,x4), 1)
+        x5 = torch.cat((x,x5), 1)
         
-        x = F.relu(self.deconv2(x4))
+        x = F.relu(self.deconv2(x5))
         x = self.deconv2_bnorm(x)
-        x8 = torch.cat((x,x8), 1)
+        x7 = torch.cat((x,x7), 1)
         
-        x = F.relu(self.deconv3(x8))
+        x = F.relu(self.deconv3(x7))
         x = self.deconv3_bnorm(x)
-        x16 = torch.cat((x,x16), 1)
+        x14 = torch.cat((x,x14), 1)
         
-        x = F.relu(self.deconv4(x16))
+        x = F.relu(self.deconv4(x14))
         x = self.deconv4_bnorm(x)
+        x28 = torch.cat((x,x28), 1)
+        
+        x = F.relu(self.deconv5(x28))
+        x = self.deconv5_bnorm(x)
+        x56 = torch.cat((x,x56), 1)
+        
+        x = F.relu(self.deconv6(x56))
+        x = self.deconv6_bnorm(x)
+        x112 = torch.cat((x,x112), 1)
+        
+        x = F.relu(self.deconv7(x112))
+        x = self.deconv7_bnorm(x)
+        x224 = torch.cat((x,x224), 1)
         
         # cross-channel parametric pooling
         # CHECK IF TANH IS A GOOD IDEA???
-        x = F.tanh(self.conv5(x))
+        x = F.tanh(self.conv8(x))
         #x = self.conv5(x)
         return x
