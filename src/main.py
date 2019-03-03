@@ -20,7 +20,7 @@ def main(options):
     np.random.seed(options.seed)
     torch.manual_seed(options.seed)
     
-    gpu_available = False#torch.cuda.is_available()
+    gpu_available = torch.cuda.is_available()
 
     # Create output directory
     if not os.path.exists(options.experiment_output_path):
