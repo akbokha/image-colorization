@@ -204,7 +204,7 @@ class UNet224(nn.Module):
         x = F.relu(self.deconv7(x112))
         x = self.deconv7_bnorm(x)
         x112 = None
-        x224 = torch.cat((x,x224), 1)
+        #x224 = torch.cat((x,x224), 1)
         
         # cross-channel parametric pooling
         # CHECK IF TANH IS A GOOD IDEA???
