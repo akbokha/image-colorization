@@ -89,8 +89,8 @@ def main(options):
     if is_gan == True:
         criterionBCE = nn.BCELoss().cuda() if gpu_available else nn.BCELoss()
         criterionMSE = nn.MSELoss().cuda() if gpu_available else nn.MSELoss()
-        optimizerG = torch.optim.Adam(model.parameters())
-        optimizerD = torch.optim.Adam(discriminator.parameters())
+        optimizerG = torch.optim.Adam(model.parameters(), betas=(0.5, 0.999), lr=0.0002)
+        optimizerD = torch.optim.Adam(discriminator.parameters(), betas=(0.5, 0.999), lr=0.0002)
         
         # train model
         epoch_stats = {"epoch": [], "train_time": [], "train_loss": [], 'val_loss': []}
@@ -243,7 +243,7 @@ def train_gan_epoch(epoch, train_loader, generator, discriminator, criterion, op
     discriminator.train()
     
     # Establish convention for real and fake labels during training
-    real_label = 1
+    real_label = 0.9
     fake_label = 0
 
     # Train for single epoch
