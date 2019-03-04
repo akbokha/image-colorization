@@ -106,3 +106,38 @@ class UNet32(nn.Module):
         #x = self.conv5(x)
         return x
 
+class NazeriDiscriminator32(nn.Module):
+    def __init__(self):
+        super(NazeriDiscriminator32, self).__init__()
+        #Convolution and deconvolution
+        self.conv1 = nn.Conv2d(3, 64, (4, 4), stride=2, padding=1)     #32-16
+        self.conv2 = nn.Conv2d(64, 128, (4, 4), stride=2, padding=1)   #16-8
+        self.conv3 = nn.Conv2d(128, 256, (4, 4), stride=2, padding=1)  #8-4
+        self.conv4 = nn.Conv2d(256, 512, (4, 4), stride=2, padding=1)  #4-2
+        self.conv5 = nn.Conv2d(512, 1, (2, 2), stride=1, padding=0)  #2-1
+        self.sigmoid = nn.Sigmoid()
+        
+        #Batchnorm
+        self.conv1_bnorm = nn.BatchNorm2d(64)
+        self.conv2_bnorm = nn.BatchNorm2d(128)
+        self.conv3_bnorm = nn.BatchNorm2d(256)
+        self.conv4_bnorm = nn.BatchNorm2d(512)
+    
+    def forward(self, x32):
+        # Contraction
+        x16 = F.leaky_relu(self.conv1(x32), 0.2)
+        x16 = self.conv1_bnorm(x16)
+        
+        x8 = F.leaky_relu(self.conv2(x16), 0.2)
+        x8 = self.conv2_bnorm(x8)
+        
+        x4 = F.leaky_relu(self.conv3(x8), 0.2)
+        x4 = self.conv3_bnorm(x4)
+        
+        x2 = F.leaky_relu(self.conv4(x4), 0.2)
+        x2 = self.conv4_bnorm(x2)
+        
+        x = self.conv5(x2)
+        x = self.sigmoid(x)
+        
+        return x
