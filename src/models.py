@@ -173,34 +173,41 @@ class UNet224(nn.Module):
         # Expansion
         x = F.relu(self.deconv1(x3))
         x = self.deconv1_bnorm(x)
+        x3 = None
         x5 = torch.cat((x,x5), 1)
         
         x = F.relu(self.deconv2(x5))
         x = self.deconv2_bnorm(x)
+        x5 = None
         x7 = torch.cat((x,x7), 1)
         
         x = F.relu(self.deconv3(x7))
         x = self.deconv3_bnorm(x)
+        x7 = None
         x14 = torch.cat((x,x14), 1)
         
         x = F.relu(self.deconv4(x14))
         x = self.deconv4_bnorm(x)
+        x14 = None
         x28 = torch.cat((x,x28), 1)
         
         x = F.relu(self.deconv5(x28))
         x = self.deconv5_bnorm(x)
+        x28 = None
         x56 = torch.cat((x,x56), 1)
         
         x = F.relu(self.deconv6(x56))
         x = self.deconv6_bnorm(x)
+        x56 = None
         x112 = torch.cat((x,x112), 1)
         
         x = F.relu(self.deconv7(x112))
         x = self.deconv7_bnorm(x)
+        x112 = None
         x224 = torch.cat((x,x224), 1)
         
         # cross-channel parametric pooling
         # CHECK IF TANH IS A GOOD IDEA???
-        x = F.tanh(self.conv8(x))
+        x = F.tanh(self.conv8(x224))
         #x = self.conv5(x)
         return x
