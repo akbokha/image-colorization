@@ -26,6 +26,46 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
+class RateMeter(object):
+    '''An easy way to compute and store rates'''
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.avg = 0
+        self.successes = 0
+        self.trials = 0
+
+    def update(self, successes, trials):
+        self.successes += successes
+        self.trials += trials
+        self.avg = self.successes / self.trials
+
+
+def save_model_state(epoch, model, optimizer, path):
+    model_state_path = os.path.join(path, 'models', 'epoch-{0:03d}'.format(epoch))
+    if not os.path.exists(model_state_path):
+        os.makedirs(model_state_path)
+
+    if isinstance(model, dict):  # GAN model: two models (generator and discriminator) & their respective optimizers
+        state_dict = {
+            'epoch': epoch,
+            'gen_model_state': model['generator'].state_dict(),
+            'dis_model_state': model['discriminator'].state_dict(),
+            'gen_optimizer_state': optimizer['generator'].state_dict(),
+            'dis_optimizer_state': optimizer['discriminator'].state_dict()
+        }
+    else:
+        state_dict = {
+            'epoch': epoch,
+            'model_state': model.state_dict(),
+            'optimizer': optimizer.state_dict()
+        }
+
+    torch.save(state_dict, os.path.join(model_state_path, 'state_dict'))
+
+
 def save_stats(experiment_log_dir, filename, stats_dict, current_epoch, continue_from_mode=False, save_full_dict=True):
     """
     Saves the statistics in stats dict into a csv file. Using the keys as the header entries and the values as the
