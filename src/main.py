@@ -236,7 +236,7 @@ def train_gan_epoch(epoch, train_loader, generator, discriminator, criterion, op
     print('Starting training epoch {}'.format(epoch))
 
     # Prepare value counters and timers
-    batch_times, data_times, loss_values = AverageMeter(), AverageMeter(), AverageMeter()
+    batch_times, data_times, loss_D_values, loss_G_values = AverageMeter(), AverageMeter(), AverageMeter(), AverageMeter()
 
     # Switch model to train mode
     generator.train()
@@ -292,7 +292,8 @@ def train_gan_epoch(epoch, train_loader, generator, discriminator, criterion, op
         
         
         # Record loss and measure accuracy
-        loss_values.update(loss_generator.item(), input_gray.size(0))
+        loss_D_values.update(loss_discriminator.item(), input_gray.size(0))
+        loss_G_values.update(loss_generator.item(), input_gray.size(0))
 
         # Record time to do forward and backward passes
         batch_times.update(time.time() - start_time)
@@ -303,13 +304,14 @@ def train_gan_epoch(epoch, train_loader, generator, discriminator, criterion, op
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
                   'Data {data_times.val:.3f} ({data_times.avg:.3f})\t'
-                  'Loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t'.format(
+                  'Loss Generator {loss_G_values.val:.4f} ({loss_G_values.avg:.4f})\t'
+                  'Loss Discriminator {loss_D_values.val:.5f} ({loss_D_values.avg:.5f})\t'.format(
                 epoch, i+1, len(train_loader), batch_times=batch_times,
-                data_times=data_times, loss_values=loss_values))
+                data_times=data_times, loss_D_values=loss_D_values, loss_G_values=loss_G_values))
 
     print('Finished training epoch {}'.format(epoch))
 
-    return batch_times.sum + data_times.sum, loss_values.avg
+    return batch_times.sum + data_times.sum, loss_G_values.avg
 
 
 def validate_gan_epoch(epoch, val_loader, generator, discriminator, criterion, save_images, gpu_available, options):
