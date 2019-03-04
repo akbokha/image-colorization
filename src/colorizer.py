@@ -236,7 +236,7 @@ def train_GAN_colorizer_epoch(epoch, train_loader, gen_model, dis_model, criteri
         if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
         # convert to FloatTensor since thnn_conv2d_forward is not implemented for type torch.ByteTensor
-        img_original = img_original.type('torch.FloatTensor')
+        img_original = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type('torch.FloatTensor')
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
