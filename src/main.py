@@ -70,8 +70,6 @@ def main(options):
             print('%s: %s' % (str(k), str(v)))
             f.write('%s: %s\n' % (str(k), str(v)))
 
-    epoch_stats = {"epoch": [], "train_time": [], "train_loss": [], 'val_loss': []}
-
     if options.model_name == 'cgan':
         if gpu_available:
             model_gen.cuda()
@@ -96,12 +94,20 @@ def main(options):
         l1_weight = 100
 
         # train model
+        epoch_stats = {"epoch": [], "train_time": [],
+                       "train_loss_D": [], "train_loss_D_real": [], "train_loss_D_generated": [],
+                       "train_loss_G": [], "train_loss_G_GAN": [], "train_loss_G_generated": [],
+                       "val_loss_D": [], "val_loss_G": []}
         for epoch in range(options.max_epochs):
-            train_time, train_loss = train_GAN_epoch(epoch, train_loader, model_gen, model_dis, criterion, l1_loss,
-                                                     l1_weight, optimizers, gpu_available, options)
-            val_loss = validate_GAN_epoch(epoch, val_loader, model_gen, model_dis, criterion, l1_loss, l1_weight, True,
-                                      gpu_available, options)
-            state_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options)
+            train_time, train_loss_G, train_loss_G_GAN, train_loss_G_gen, train_loss_D, train_loss_D_real,\
+            train_loss_D_gen = train_GAN_epoch(epoch, train_loader, model_gen, model_dis, criterion, l1_loss,
+                                               l1_weight, optimizers, gpu_available, options)
+
+            val_loss_G, val_loss_D = validate_GAN_epoch(epoch, val_loader, model_gen, model_dis, criterion, l1_loss,
+                                                        l1_weight, True, gpu_available, options)
+            state_epoch_stats_GAN(epoch, epoch_stats, train_loss_G, train_loss_G_GAN, train_loss_G_gen,
+                                  train_loss_D, train_loss_D_real, train_loss_D_gen,
+                                  val_loss_G, val_loss_D, train_time, options)
             save_model_state(epoch, models, optimizers, options)
 
     else:  # resnet or u-net
@@ -114,6 +120,7 @@ def main(options):
         optimizer = torch.optim.Adam(model.parameters())
 
         # train model
+        epoch_stats = {"epoch": [], "train_time": [], "train_loss": [], 'val_loss': []}
         for epoch in range(options.max_epochs):
             train_time, train_loss = train_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available,
                                                  options)
@@ -260,7 +267,9 @@ def train_GAN_epoch(epoch, train_loader, gen_model, dis_model, criterion, l1_los
     print('Starting training epoch {}'.format(epoch))
 
     # Prepare value counters and timers
-    batch_times, data_times, loss_values = AverageMeter(), AverageMeter(), AverageMeter()
+    batch_times, data_times = AverageMeter(), AverageMeter()
+    loss_G, loss_G_GAN, loss_G_real = AverageMeter(), AverageMeter(), AverageMeter()
+    loss_D, loss_D_gen, loss_D_real = AverageMeter(), AverageMeter(), AverageMeter()
 
     # Switch model to train mode
     gen_model.train()
@@ -328,18 +337,33 @@ def train_GAN_epoch(epoch, train_loader, gen_model, dis_model, criterion, l1_los
         batch_times.update(time.time() - start_time)
         start_time = time.time()
 
+        loss_G.update(gen_err.item(), img_original.size(0))
+        loss_G_GAN.update(gen_err.item(), img_original.size(0))
+        loss_G_real.update(gen_err_loss.item(), img_original.size(0))
+
+        loss_D.update(dis_error.item(), img_original.size(0))
+        loss_D_gen.update(dis_err_gen.item(), img_original.size(0))
+        loss_D_real.update(dis_err_real.item(), img_original.size(0))
+
         # Print stats -- in the code below, val refers to value, not validation
         if i % options.batch_output_frequency == 0:
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
                   'Data {data_times.val:.3f} ({data_times.avg:.3f})\t'
-                  'Loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t'.format(
+                  'loss_G {loss_G.val:.4f} ({loss_G.avg:.4f})\t'
+                  'loss_G_GAN {loss_G_GAN.val:.4f} ({loss_G_GAN.avg:.4f})\t'
+                  'loss_G_real {loss_G_real.val:.4f} ({loss_G_real.avg:.4f})\t'
+                  'loss_D {loss_D.val:.4f} ({loss_D.avg:.4f})\t'
+                  'loss_D_gen {loss_D_gen.val:.4f} ({loss_D_gen.avg:.4f})\t'
+                  'loss_D_real {loss_D_real.val:.4f} ({loss_D_real.avg:.4f})\t'.format(
                 epoch, i + 1, len(train_loader), batch_times=batch_times,
-                data_times=data_times, loss_values=loss_values))
+                data_times=data_times, loss_G=loss_G, loss_G_GAN=loss_G_GAN, loss_G_real=loss_G_real,
+                loss_D=loss_D, loss_D_gen=loss_D_gen, loss_D_real=loss_D_real))
 
     print('Finished training epoch {}'.format(epoch))
 
-    return batch_times.sum + data_times.sum, loss_values.avg
+    return batch_times.sum + data_times.sum, loss_G.avg, loss_G_GAN.avg, loss_G_real.avg,\
+           loss_D.avg, loss_D_real.avg, loss_D_gen.avg
 
 
 def validate_GAN_epoch(epoch, val_loader, gen_model, dis_model, criterion, l1_loss, l1_weight, save_images,
@@ -361,7 +385,7 @@ def validate_GAN_epoch(epoch, val_loader, gen_model, dis_model, criterion, l1_lo
             os.makedirs(image_path)
 
     # Prepare value counters and timers
-    batch_times, data_times, loss_values = AverageMeter(), AverageMeter(), AverageMeter()
+    batch_times, data_times, loss_G, loss_D = AverageMeter(), AverageMeter(), AverageMeter(), AverageMeter()
 
     # Switch model to validation mode
     gen_model.eval()
@@ -420,8 +444,8 @@ def validate_GAN_epoch(epoch, val_loader, gen_model, dis_model, criterion, l1_lo
 
             gen_err = gen_err_g + gen_err_L1
 
-            # Record loss and measure accuracy
-        loss_values.update(gen_err.item(), input_gray.size(0))
+        loss_G.update(gen_err.item(), img_original.size(0))
+        loss_D.update(dis_error.item(), img_original.size(0))
 
         # Save images to file
         if save_images and num_images_saved < options.max_images:
@@ -447,12 +471,13 @@ def validate_GAN_epoch(epoch, val_loader, gen_model, dis_model, criterion, l1_lo
         if i % options.batch_output_frequency == 0:
             print('Validate: [{0}/{1}]\t'
                   'Time {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
-                  'Loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t'.format(
-                i + 1, len(val_loader), batch_times=batch_times, loss_values=loss_values))
+                  'Loss_G {loss_G.val:.4f} ({loss_G.avg:.4f})\t'
+                  'Loss_D {loss_D.val:.4f} ({loss_D.avg:.4f})\t'.format(
+                i + 1, len(val_loader), batch_times=batch_times, loss_G=loss_G, loss_D=loss_D))
 
     print('Finished validation.')
 
-    return loss_values.avg
+    return loss_G.avg, loss_D.avg
 
 
 def state_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options):
@@ -463,12 +488,27 @@ def state_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, opti
     save_stats(options.experiment_output_path, 'train_stats.csv', epoch_stats, epoch)
 
 
+def state_epoch_stats_GAN(epoch, epoch_stats, train_loss_G, train_loss_G_GAN, train_loss_G_gen, train_loss_D,
+                          train_loss_D_real, train_loss_D_gen, val_loss_G, val_loss_D, train_time, options):
+    epoch_stats['epoch'].append(epoch)
+    epoch_stats['train_time'].append(train_time)
+    epoch_stats['train_loss_G'].append(train_loss_G)
+    epoch_stats['train_loss_G_GAN'].append(train_loss_G_GAN)
+    epoch_stats['train_loss_G_generated'].append(train_loss_G_gen)
+    epoch_stats['train_loss_D'].append(train_loss_D)
+    epoch_stats['train_loss_D_real'].append(train_loss_D_real)
+    epoch_stats['train_loss_D_generated'].append(train_loss_D_gen)
+    epoch_stats['val_loss_G'].append(val_loss_G)
+    epoch_stats['val_loss_D'].append(val_loss_D)
+    save_stats(options.experiment_output_path, 'train_stats.csv', epoch_stats, epoch)
+
+
 def save_model_state(epoch, model, optimizer, options):
     model_state_path = os.path.join(options.experiment_output_path, 'models', 'epoch-{0:03d}'.format(epoch))
     if not os.path.exists(model_state_path):
         os.makedirs(model_state_path)
 
-    if isinstance(optimizer, dict):
+    if isinstance(model, dict):  # GAN model: two models (generator and discriminator) & their respective optimizers
         state_dict = {
             'epoch': epoch,
             'gen_model_state': model['generator'].state_dict(),
