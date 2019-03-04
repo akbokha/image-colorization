@@ -262,6 +262,10 @@ def train_gan_epoch(epoch, train_loader, generator, discriminator, criterion, op
         real_labels = torch.full((batch_size,), real_label)
         fake_labels = torch.full((batch_size,), fake_label)
         
+        if gpu_available:
+            real_labels = real_labels.cuda()
+            fake_labels = fake_labels.cuda()
+        
         # Zero gradients
         optimizerG.zero_grad()
         optimizerD.zero_grad()
