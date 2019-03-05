@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from skimage.color import lab2rgb
+from skimage.color import lab2rgb, rgb2lab
 
 
 class AverageMeter(object):
@@ -111,9 +111,15 @@ def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, 
     elif gan_result:
         generated = generated.cpu().numpy()
         generated = generated.transpose((1, 2, 0))  # rescale for matplotlib
-        ab_channels = generated[:, :, 1:3]
-        ab_channels = ab_channels.transpose((2, 0, 1))
-        color_image = torch.cat((grayscale_layer, torch.from_numpy(ab_channels)), 0).numpy()  # combine channels
+        generated = (generated + 1) / 2
+
+        img_lab = rgb2lab(generated)
+        img_lab = (img_lab + 128) / 255
+
+        img_ab = img_lab[:, :, 1:3]
+        img_ab = torch.from_numpy(img_ab.transpose((2, 0, 1))).float()
+
+        color_image = torch.cat((grayscale_layer, img_ab), 0).numpy()  # combine channels
         color_image = color_image.transpose((1, 2, 0))  # rescale for matplotlib
         color_image[:, :, 0:1] = color_image[:, :, 0:1] * 100
         color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
