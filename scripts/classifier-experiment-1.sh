@@ -29,8 +29,8 @@ export TMP=/disk/scratch/${STUDENT_ID}/
 
 # copy and extract places365 data to scratch disk
 mkdir -p ${TMP}/data/
-rsync -ua /home/${STUDENT_ID}/data/places365_mlp.tar ${TMP}/data/
-tar xvf ${TMP}/data/places365_mlp.tar
+#rsync -ua /home/${STUDENT_ID}/data/places365_mlp.tar ${TMP}/data/
+#tar xf ${TMP}/data/places365_mlp.tar
 
 export DATASET_DIR=${TMP}/data/
 
@@ -40,7 +40,7 @@ python /home/${STUDENT_ID}/image-colorization/train.py \
     --task=classifier
     --experiment-name=cls_1 \
     --dataset-root-path $DATASET_DIR \
-    --dataset-name=places365 \
+    --dataset-name=placeholder \
     --model-path=/home/${STUDENT_ID}/models/
     --train-batch-size=100 \
     --val-batch-size=100 \
