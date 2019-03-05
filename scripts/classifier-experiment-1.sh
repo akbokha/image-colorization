@@ -41,7 +41,7 @@ source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 python /home/${STUDENT_ID}/image-colorization/train.py \
     --task=classifier \
     --experiment-name=cls_1 \
-    --dataset-root-path /home/${STUDENT_ID}/image-colorization/data/ \
+    --dataset-root-path=/home/${STUDENT_ID}/image-colorization/data/ \
     --dataset-name=placeholder \
     --model-path=/home/${STUDENT_ID}/models/ \
     --train-batch-size=100 \
