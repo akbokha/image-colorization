@@ -238,6 +238,12 @@ def train_GAN_colorizer_epoch(epoch, train_loader, gen_model, dis_model, criteri
         # convert to FloatTensor since thnn_conv2d_forward is not implemented for type torch.ByteTensor
         img_original = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type('torch.FloatTensor')
 
+        # convert to range [-1, 1]
+        img_original = (img_original - 127.5) / 127.5
+
+        # convert to range [0, 100]
+        input_gray = input_gray * 100
+
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
         start_time = time.time()
@@ -355,6 +361,12 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
 
         # convert to FloatTensor since thnn_conv2d_forward is not implemented for type torch.ByteTensor
         img_original = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type('torch.FloatTensor')
+
+        # convert to range [-1, 1]
+        img_original = (img_original - 127.5) / 127.5
+
+        # convert to range [0, 100]
+        input_gray = input_gray * 100
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
