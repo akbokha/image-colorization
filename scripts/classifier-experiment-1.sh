@@ -43,7 +43,7 @@ python /home/${STUDENT_ID}/image-colorization/train.py \
     --experiment-name=cls_1 \
     --dataset-root-path /home/${STUDENT_ID}/image-colorization/data/ \
     --dataset-name=placeholder \
-    --models-path=/home/${STUDENT_ID}/models/ \
+    --model-path=/home/${STUDENT_ID}/models/ \
     --train-batch-size=100 \
     --val-batch-size=100 \
     --batch-output-frequency=100 \
