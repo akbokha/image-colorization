@@ -109,7 +109,7 @@ def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, 
         plt.imsave(arr=grayscale_input, fname=os.path.join(save_paths['grayscale'], save_name), cmap='gray')
         plt.imsave(arr=img_original.numpy().transpose((1, 2, 0)), fname=os.path.join(save_paths['original'], save_name))
     elif gan_result:
-        generated = generated.cpu().numpy()
+        generated = generated.cpu().numpy().astype(np.float64)
         generated = generated.transpose((1, 2, 0))  # rescale for matplotlib
         generated = (generated + 1) / 2
 
