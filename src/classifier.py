@@ -48,12 +48,18 @@ def train_classifier(gpu_available, options, train_loader, val_loader):
         "val_acc": []
     }
 
+    best_val_acc = 0
     for epoch in range(options.max_epochs):
         train_time, train_loss, train_acc, val_loss, val_acc = train_val_epoch(
             epoch, train_loader, val_loader, criterion, model, optimizer, scheduler, gpu_available, options)
+
         save_epoch_stats(
             epoch, epoch_stats, train_time, train_loss, train_acc, val_loss, val_acc, options.experiment_output_path)
-        save_model_state(epoch, model, optimizer, options.experiment_output_path)
+
+        # Save model weights if validation accuracy has improved
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            save_model_state(options.experiment_output_path, epoch, model)
 
 
 def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer, scheduler, gpu_available, options):
@@ -119,7 +125,7 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
                       'data {data_times.val:.3f} ({data_times.avg:.3f})\t'
                       'proc {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
                       'loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t'
-                      'acc ({acc_rate.avg:.4f})'.format(
+                      'acc ({acc_rate.rate:.4f})'.format(
                     epoch, i + 1, len(train_loader), batch_times=batch_times,
                     data_times=data_times, loss_values=loss_values, acc_rate=acc_rate))
 
@@ -127,11 +133,11 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
             print('Finished training epoch {}'.format(epoch))
             epoch_train_time = batch_times.sum + data_times.sum
             epoch_train_loss = loss_values.avg
-            epoch_train_acc = acc_rate.avg
+            epoch_train_acc = acc_rate.rate
         else:
             print('Finished validation epoch {}'.format(epoch))
             epoch_val_loss = loss_values.avg
-            epoch_val_acc = acc_rate.avg
+            epoch_val_acc = acc_rate.rate
 
     return epoch_train_time, epoch_train_loss, epoch_train_acc, epoch_val_loss, epoch_val_acc
 

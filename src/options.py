@@ -24,7 +24,7 @@ class ModelOptions:
         parser.add_argument('--model-name', type=str, default='resnet', help='Model architecture (default: resnet)')
         parser.add_argument('--model-path', type=str, default='./models', help='Path for pretrained models')
         parser.add_argument('--dataset-name', type=str, default='placeholder',
-                            help='the input dataset to use [placeholder, cifar10, places205, places365] (default: placeholder)')
+                            help='the dataset to use [placeholder, cifar10, places205, places365] (default: placeholder)')
         parser.add_argument('--dataset-root-path', type=str, default='./data',
                             help='dataset root path (default: ./data)')
         parser.add_argument('--output-root-path', type=str, default='./output',

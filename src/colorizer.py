@@ -26,7 +26,7 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
         train_time, train_loss = train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options)
         val_loss = validate_colorizer_epoch(epoch, val_loader, model, criterion, True, gpu_available, options)
         save_epoch_stats(epoch, epoch_stats, train_time, train_loss, val_loss, options.experiment_output_path)
-        save_model_state(epoch, model, optimizer, options.experiment_output_path)
+        save_model_state(options.experiment_output_path, epoch, model, optimizer)
 
 
 def train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options):
