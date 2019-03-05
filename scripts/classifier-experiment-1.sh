@@ -38,10 +38,10 @@ export DATASET_DIR=${TMP}/data/
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
 # Run script
-cd ..
 python /home/${STUDENT_ID}/image-colorization/train.py \
     --task=classifier \
     --experiment-name=cls_1 \
+    --dataset-root-path /home/${STUDENT_ID}/image-colorization/data/
     --dataset-name=placeholder \
     --model-path=/home/${STUDENT_ID}/models/ \
     --train-batch-size=100 \
@@ -49,4 +49,5 @@ python /home/${STUDENT_ID}/image-colorization/train.py \
     --batch-output-frequency=100 \
     --max-epochs=5
 
-#    --dataset-root-path $DATASET_DIR \
+#   --dataset-root-path $DATASET_DIR \
+#   --dataset-name=places365 \
