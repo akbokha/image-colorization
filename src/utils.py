@@ -111,12 +111,8 @@ def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, 
     elif gan_result:
         generated = generated.cpu().numpy().astype(np.float64)
         generated = generated.transpose((1, 2, 0))  # rescale for matplotlib
-        generated = (generated + 1) / 2
 
-        img_lab = rgb2lab(generated)
-        img_lab = (img_lab + 128) / 255
-
-        img_ab = img_lab[:, :, 1:3]
+        img_ab = generated[:, :, 1:3]
         img_ab = torch.from_numpy(img_ab.transpose((2, 0, 1))).float()
 
         color_image = torch.cat((grayscale_layer, img_ab), 0).numpy()  # combine channels
