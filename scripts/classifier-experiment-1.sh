@@ -36,14 +36,17 @@ export DATASET_DIR=${TMP}/data/
 
 # Activate the relevant virtual environment:
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
+
+# Run script
+cd ..
 python /home/${STUDENT_ID}/image-colorization/train.py \
-    --task=classifier
+    --task=classifier \
     --experiment-name=cls_1 \
     --dataset-name=placeholder \
-    --model-path=/home/${STUDENT_ID}/models/
+    --model-path=/home/${STUDENT_ID}/models/ \
     --train-batch-size=100 \
     --val-batch-size=100 \
-    --batch-output-frequency=100
+    --batch-output-frequency=100 \
     --max-epochs=5
 
 #    --dataset-root-path $DATASET_DIR \
