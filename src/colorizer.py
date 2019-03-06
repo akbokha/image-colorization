@@ -1,3 +1,4 @@
+import math
 import time
 
 import torch.optim
@@ -154,10 +155,10 @@ def validate_colorizer_epoch(epoch, val_loader, model, criterion, save_images, g
     # Switch model to validation mode
     model.eval()
 
-    num_images_saved = 0
-
     # Run through validation set
     start_time = time.time()
+    num_images_saved = 0
+    num_images_per_batch = math.ceil(max(options.max_images / len(val_loader), 1))
     for i, (input_gray, input_ab, img_original) in enumerate(val_loader):
 
         # Use GPU if available
@@ -177,8 +178,9 @@ def validate_colorizer_epoch(epoch, val_loader, model, criterion, save_images, g
         loss_values.update(loss.item(), input_gray.size(0))
 
         # Save images to file
+
         if save_images and num_images_saved < options.max_images:
-            for j in range(min(len(output_ab), options.max_images - num_images_saved)):
+            for j in range(min(num_images_per_batch, options.max_images - num_images_saved)):
                 gray_layer = input_gray[j].detach().cpu()
                 ab_layers = output_ab[j].detach().cpu()
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
