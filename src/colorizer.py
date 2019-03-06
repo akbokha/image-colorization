@@ -236,13 +236,13 @@ def train_GAN_colorizer_epoch(epoch, train_loader, gen_model, dis_model, criteri
         if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
         # convert to FloatTensor since thnn_conv2d_forward is not implemented for type torch.ByteTensor
-        img_original = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type('torch.FloatTensor')
+        target_img = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type('torch.FloatTensor')
 
         # convert to range [-1, 1]
-        img_original = (img_original - 127.5) / 127.5
+        target_img = (target_img - 127.5) / 127.5
 
         # convert to range [0, 100]
-        input_gray = input_gray * 100
+        input_l = input_gray * 100
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
@@ -255,16 +255,16 @@ def train_GAN_colorizer_epoch(epoch, train_loader, gen_model, dis_model, criteri
         """
         # Train with real examples
         dis_model.zero_grad()
-        output = dis_model(img_original)
+        output = dis_model(target_img)
 
-        label = torch.FloatTensor(img_original.size(0)).fill_(REAL).cuda() if gpu_available else torch.FloatTensor(
-            img_original.size(0)).fill_(REAL)
+        label = torch.FloatTensor(target_img.size(0)).fill_(REAL).cuda() if gpu_available else torch.FloatTensor(
+            target_img.size(0)).fill_(REAL)
 
         dis_err_real = criterion(torch.squeeze(output), label)
         dis_err_real.backward()
 
         # Train with generated examples
-        generated_examples = gen_model(input_gray)
+        generated_examples = gen_model(input_l)
         output = dis_model(generated_examples.detach())
         label = label.fill_(GENERATED)  # replace with zeroes
 
@@ -282,7 +282,7 @@ def train_GAN_colorizer_epoch(epoch, train_loader, gen_model, dis_model, criteri
         output = dis_model(generated_examples)
         gen_err_g = criterion(torch.squeeze(output), label)
         gen_err_loss = l1_loss(generated_examples.view(generated_examples.size(0), -1),
-                               img_original.view(img_original.size(0), -1)) * l1_weight
+                               target_img.view(target_img.size(0), -1)) * l1_weight
 
         gen_err = gen_err_g + gen_err_loss
         gen_err.backward()
@@ -292,13 +292,13 @@ def train_GAN_colorizer_epoch(epoch, train_loader, gen_model, dis_model, criteri
         batch_times.update(time.time() - start_time)
         start_time = time.time()
 
-        loss_G.update(gen_err.item(), img_original.size(0))
-        loss_G_GAN.update(gen_err.item(), img_original.size(0))
-        loss_G_real.update(gen_err_loss.item(), img_original.size(0))
+        loss_G.update(gen_err.item(), target_img.size(0))
+        loss_G_GAN.update(gen_err.item(), target_img.size(0))
+        loss_G_real.update(gen_err_loss.item(), target_img.size(0))
 
-        loss_D.update(dis_error.item(), img_original.size(0))
-        loss_D_gen.update(dis_err_gen.item(), img_original.size(0))
-        loss_D_real.update(dis_err_real.item(), img_original.size(0))
+        loss_D.update(dis_error.item(), target_img.size(0))
+        loss_D_gen.update(dis_err_gen.item(), target_img.size(0))
+        loss_D_real.update(dis_err_real.item(), target_img.size(0))
 
         # Print stats -- in the code below, val refers to value, not validation
         if i % options.batch_output_frequency == 0:
@@ -360,13 +360,13 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
         if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
         # convert to FloatTensor since thnn_conv2d_forward is not implemented for type torch.ByteTensor
-        img_original = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type('torch.FloatTensor')
+        target_img = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type('torch.FloatTensor')
 
         # convert to range [-1, 1]
-        img_original = (img_original - 127.5) / 127.5
+        target_img = (target_img - 127.5) / 127.5
 
         # convert to range [0, 100]
-        input_gray = input_gray * 100
+        input_l = input_gray * 100
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
@@ -380,13 +380,13 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
             2. Validate with generated examples
             """
             # Validate with real examples
-            output = dis_model(img_original)
-            label = torch.FloatTensor(img_original.size(0)).fill_(REAL).cuda() if gpu_available else torch.FloatTensor(
-                img_original.size(0)).fill_(REAL)
+            output = dis_model(target_img)
+            label = torch.FloatTensor(target_img.size(0)).fill_(REAL).cuda() if gpu_available else torch.FloatTensor(
+                target_img.size(0)).fill_(REAL)
             dis_err_real = criterion(torch.squeeze(output), label)
 
             # Validate with generated examples
-            generated = gen_model(input_gray)
+            generated = gen_model(input_l)
             label = label.fill_(GENERATED)  # replace with zeroes
             output = dis_model(generated.detach())
             dis_err_gen = criterion(torch.squeeze(output), label)
@@ -401,12 +401,12 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
 
             gen_err_g = criterion(torch.squeeze(output), label)
             gen_err_L1 = l1_loss(generated.view(generated.size(0), -1),
-                                 img_original.view(img_original.size(0), -1)) * l1_weight
+                                 target_img.view(target_img.size(0), -1)) * l1_weight
 
             gen_err = gen_err_g + gen_err_L1
 
-        loss_G.update(gen_err.item(), img_original.size(0))
-        loss_D.update(dis_error.item(), img_original.size(0))
+        loss_G.update(gen_err.item(), target_img.size(0))
+        loss_D.update(dis_error.item(), target_img.size(0))
 
         # Save images to file
         if save_images and num_images_saved < options.max_images:
@@ -415,7 +415,6 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
                 # save gray-scale image and respective ground-truth images after first epoch
                 if epoch == 0:
-                    img_original = img_original.type('torch.ByteTensor')
                     save_colorized_images(gray_layer, None, img_original[j],
                                           save_paths=image_output_paths, save_name=save_name, save_static_images=True)
                 # save colorizations after every epoch
