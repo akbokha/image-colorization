@@ -24,8 +24,8 @@ export PYTHON_PATH=$PATH
 
 # Set up scratch disk directory
 mkdir -p /disk/scratch/${STUDENT_ID}
-export TMPDIR=/disk/scratch/${STUDENT_ID}/
-export TMP=/disk/scratch/${STUDENT_ID}/
+export TMPDIR=/disk/scratch/${STUDENT_ID}
+export TMP=/disk/scratch/${STUDENT_ID}
 
 # copy and extract places365 data to scratch disk
 mkdir -p ${TMP}/data/
@@ -36,6 +36,9 @@ if [ ! -d "${TMP}/data/places365" ]; then
 fi
 
 export DATASET_DIR=${TMP}/data/
+
+echo $DATASET_DIR
+
 
 # Activate the relevant virtual environment:
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
