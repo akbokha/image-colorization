@@ -242,7 +242,7 @@ def train_GAN_colorizer_epoch(epoch, train_loader, gen_model, dis_model, criteri
         target_img = (target_img - 127.5) / 127.5
 
         # convert to range [0, 100]
-        input_l = input_gray * 100
+        input_l = input_gray
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
@@ -366,7 +366,7 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
         target_img = (target_img - 127.5) / 127.5
 
         # convert to range [0, 100]
-        input_l = input_gray * 100
+        input_l = input_gray
 
         # Record time to load data (above)
         data_times.update(time.time() - start_time)
