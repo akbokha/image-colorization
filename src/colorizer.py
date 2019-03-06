@@ -184,10 +184,10 @@ def validate_colorizer_epoch(epoch, val_loader, model, criterion, save_images, g
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
                 # save gray-scale image and respective ground-truth images after first epoch
                 if epoch == 0:
-                    save_colorized_images(gray_layer, ab_layers, img_original[j],
+                    save_colorized_images(gray_layer, ab_layers, img_original[j].detach().cpu(),
                                           save_paths=image_output_paths, save_name=save_name, save_static_images=True)
                 # save colorizations after every epoch
-                save_colorized_images(gray_layer, ab_layers, img_original[j],
+                save_colorized_images(gray_layer, ab_layers, img_original[j].detach().cpu(),
                                       save_paths=image_output_paths, save_name=save_name)
                 num_images_saved += 1
 
@@ -415,10 +415,10 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
                 # save gray-scale image and respective ground-truth images after first epoch
                 if epoch == 0:
-                    save_colorized_images(gray_layer, None, img_original[j],
+                    save_colorized_images(gray_layer, None, img_original[j].detach().cpu(),
                                           save_paths=image_output_paths, save_name=save_name, save_static_images=True)
                 # save colorizations after every epoch
-                save_colorized_images(gray_layer, None, img_original[j],
+                save_colorized_images(gray_layer, None, img_original[j].detach().cpu(),
                                       save_paths=image_output_paths, save_name=save_name, gan_result=True,
                                       generated=generated[j])
                 num_images_saved += 1
