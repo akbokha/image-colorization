@@ -1,4 +1,5 @@
 #!/bin/sh
+
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
 #SBATCH --partition=Short
@@ -27,18 +28,12 @@ mkdir -p /disk/scratch/${STUDENT_ID}
 export TMPDIR=/disk/scratch/${STUDENT_ID}
 export TMP=/disk/scratch/${STUDENT_ID}
 
-# copy and extract places365 data to scratch disk
-mkdir -p ${TMP}/data/
-if [ ! -d "${TMP}/data/places365" ]; then
-    echo "Copying dataset."
-    rsync -ua /home/${STUDENT_ID}/data/places365_mlp.tar ${TMP}/data/
-    tar xf ${TMP}/data/places365_mlp.tar
-fi
-
-export DATASET_DIR=${TMP}/data/
-
-echo $DATASET_DIR
-
+# copy places365 folder structure to scratch disk
+echo "Copying dataset."
+export DATASET_DIR=${TMP}/data
+mkdir -p $DATASET_DIR
+rsync -ua /home/${STUDENT_ID}/data/places365 $DATASET_DIR
+echo "DATASET_DIR: $DATASET_DIR"
 
 # Activate the relevant virtual environment:
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
