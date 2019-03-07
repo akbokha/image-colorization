@@ -29,9 +29,9 @@ export TMP=/disk/scratch/${STUDENT_ID}/
 
 # copy places365 folder structure to scratch disk
 echo "Copying dataset."
-export DATASET_DIR=${TMP}/data
+export DATASET_DIR=${TMP}data
 mkdir -p $DATASET_DIR
-rsync -ua /home/${STUDENT_ID}/data/places365 $DATASET_DIR
+rsync -ua /home/${STUDENT_ID}/image-colorization/data/places365 $DATASET_DIR
 echo "DATASET_DIR: $DATASET_DIR"
 
 
