@@ -1,11 +1,11 @@
 #!/bin/sh
-
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
-#SBATCH --partition=Short
+#SBATCH --partition=LongJobs
 #SBATCH --gres=gpu:4
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-03:59:00
+#SBATCH --time=0-80:00:00
+
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -49,4 +49,4 @@ python /home/${STUDENT_ID}/image-colorization/train.py \
     --train-batch-size=16 \
     --val-batch-size=16 \
     --batch-output-frequency=100 \
-    --max-epochs=5
+    --max-epochs=100
