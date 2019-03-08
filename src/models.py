@@ -208,6 +208,7 @@ class UNet224(nn.Module):
         
         # cross-channel parametric pooling
         # CHECK IF TANH IS A GOOD IDEA???
-        x = F.tanh(self.conv8(x224))
+        x = F.tanh(self.conv8(x))
         #x = self.conv5(x)
         return x
+
