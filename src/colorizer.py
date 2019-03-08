@@ -228,7 +228,7 @@ def train_GAN_colorizer_epoch(epoch, train_loader, gen_model, dis_model, criteri
     dis_model.train()
 
     # Labels that are used by the discriminator to classify real and generated samples
-    REAL = 1
+    REAL = 0.9
     GENERATED = 0
 
     # Train for single epoch
@@ -352,7 +352,7 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
     dis_model.eval()
 
     # Labels that are used by the discriminator to classify real and generated samples
-    REAL = 1
+    REAL = 0.9
     GENERATED = 0
 
     num_images_saved = 0
