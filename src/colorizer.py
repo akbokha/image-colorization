@@ -34,6 +34,7 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
             'discriminator': model_dis
         }
 
+        criterion_MSE = nn.MSELoss().cuda() if gpu_available else nn.MSELoss()
         criterion = nn.BCELoss().cuda() if gpu_available else nn.BCELoss()
         l1_loss = nn.L1Loss().cuda() if gpu_available else nn.L1Loss()
 
@@ -43,17 +44,19 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
         epoch_stats = {"epoch": [], "train_time": [],
                        "train_loss_D": [], "train_loss_D_real": [], "train_loss_D_generated": [],
                        "train_loss_G": [], "train_loss_G_GAN": [], "train_loss_G_generated": [],
-                       "val_loss_D": [], "val_loss_G": []}
+                       "val_loss_D": [], "val_loss_G": [], "val_loss_MSE": []}
         for epoch in range(options.max_epochs):
             train_time, train_loss_G, train_loss_G_GAN, train_loss_G_gen, train_loss_D, train_loss_D_real, \
             train_loss_D_gen = train_GAN_colorizer_epoch(epoch, train_loader, model_gen, model_dis, criterion, l1_loss,
                                                          l1_weight, optimizers, gpu_available, options)
 
-            val_loss_G, val_loss_D = validate_GAN_colorizer_epoch(epoch, val_loader, model_gen, model_dis, criterion,
-                                                                  l1_loss, l1_weight, True, gpu_available, options)
+            val_loss_G, val_loss_D, val_loss_MSE = validate_GAN_colorizer_epoch(epoch, val_loader, model_gen, model_dis,
+                                                                                criterion,
+                                                                                criterion_MSE, l1_loss, l1_weight, True,
+                                                                                gpu_available, options)
             save_epoch_stats_GAN(epoch, epoch_stats, train_loss_G, train_loss_G_GAN, train_loss_G_gen,
                                  train_loss_D, train_loss_D_real, train_loss_D_gen,
-                                 val_loss_G, val_loss_D, train_time, options.experiment_output_path)
+                                 val_loss_G, val_loss_D, val_loss_MSE, train_time, options.experiment_output_path)
             save_model_state(options.experiment_output_path, epoch, models, optimizers)
 
     else:  # resnet or u-net
@@ -322,8 +325,8 @@ def train_GAN_colorizer_epoch(epoch, train_loader, gen_model, dis_model, criteri
            loss_D.avg, loss_D_real.avg, loss_D_gen.avg
 
 
-def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criterion, l1_loss, l1_weight, save_images,
-                                 gpu_available, options):
+def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criterion, criterion_MSE, l1_loss, l1_weight,
+                                 save_images, gpu_available, options):
     """
     Validate model on data in val_loader
     """
@@ -341,7 +344,8 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
             os.makedirs(image_path)
 
     # Prepare value counters and timers
-    batch_times, data_times, loss_G, loss_D = AverageMeter(), AverageMeter(), AverageMeter(), AverageMeter()
+    batch_times, data_times, loss_G, loss_D, loss_MSE = AverageMeter(), AverageMeter(), AverageMeter(), \
+                                                        AverageMeter(), AverageMeter()
 
     # Switch model to validation mode
     gen_model.eval()
@@ -407,8 +411,11 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
 
             gen_err = gen_err_g + gen_err_L1
 
+            mse_loss = criterion_MSE(generated, target_img)
+
         loss_G.update(gen_err.item(), target_img.size(0))
         loss_D.update(dis_error.item(), target_img.size(0))
+        loss_MSE.update(mse_loss.item(), target_img.size(0))
 
         # Save images to file
         if save_images and num_images_saved < options.max_images:
@@ -434,16 +441,17 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
             print('Validate: [{0}/{1}]\t'
                   'Time {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
                   'Loss_G {loss_G.val:.4f} ({loss_G.avg:.4f})\t'
-                  'Loss_D {loss_D.val:.4f} ({loss_D.avg:.4f})\t'.format(
-                i + 1, len(val_loader), batch_times=batch_times, loss_G=loss_G, loss_D=loss_D))
+                  'Loss_D {loss_D.val:.4f} ({loss_D.avg:.4f})\t'
+                  'Loss_MSE {loss_MSE.val:.4f} ({loss_MSE.avg:.4f})\t'.format(
+                i + 1, len(val_loader), batch_times=batch_times, loss_G=loss_G, loss_D=loss_D, loss_MSE=loss_MSE))
 
     print('Finished validation.')
 
-    return loss_G.avg, loss_D.avg
+    return loss_G.avg, loss_D.avg, loss_MSE.avg
 
 
 def save_epoch_stats_GAN(epoch, epoch_stats, train_loss_G, train_loss_G_GAN, train_loss_G_gen, train_loss_D,
-                         train_loss_D_real, train_loss_D_gen, val_loss_G, val_loss_D, train_time, path):
+                         train_loss_D_real, train_loss_D_gen, val_loss_G, val_loss_D, val_loss_MSE, train_time, path):
     epoch_stats['epoch'].append(epoch)
     epoch_stats['train_time'].append(train_time)
     epoch_stats['train_loss_G'].append(train_loss_G)
@@ -454,6 +462,7 @@ def save_epoch_stats_GAN(epoch, epoch_stats, train_loss_G, train_loss_G_GAN, tra
     epoch_stats['train_loss_D_generated'].append(train_loss_D_gen)
     epoch_stats['val_loss_G'].append(val_loss_G)
     epoch_stats['val_loss_D'].append(val_loss_D)
+    epoch_stats['val_loss_MSE'].append(val_loss_MSE)
     save_stats(path, 'train_stats.csv', epoch_stats, epoch)
 
 
