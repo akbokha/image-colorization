@@ -22,16 +22,33 @@ export PATH=${CUDA_HOME}/bin:${PATH}
 
 export PYTHON_PATH=$PATH
 
+# Set up scratch disk directory
 mkdir -p /disk/scratch/${STUDENT_ID}
-
-
 export TMPDIR=/disk/scratch/${STUDENT_ID}/
 export TMP=/disk/scratch/${STUDENT_ID}/
 
-mkdir -p ${TMP}/data/
-rsync -ua /home/${STUDENT_ID}/image-colorization/data/ ${TMP}/data/
-export DATASET_DIR=${TMP}/data/
+# copy places365 folder structure to scratch disk
+echo "Copying dataset."
+export DATASET_DIR=${TMP}data
+mkdir -p $DATASET_DIR
+rsync -ua /home/${STUDENT_ID}/image-colorization/data/places365 $DATASET_DIR
+echo "DATASET_DIR: $DATASET_DIR"
+
 
 # Activate the relevant virtual environment:
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
-python /home/${STUDENT_ID}/image-colorization/train.py --experiment-name=gan_places205_dt_standard_100epochs_ig --model-name=cgan --dataset-name=places205 --train-batch-size=16 --val-batch-size=100 --batch-output-frequency=10 --max-images=20 --max-epochs=100
+
+# Run script
+echo "Starting training."
+python /home/${STUDENT_ID}/image-colorization/train.py \
+    --task=colorizer \
+    --experiment-name=gan_places365_standard_300e \
+    --model-name=cgan \
+    --dataset-root-path=$DATASET_DIR \
+    --dataset-name=places365 \
+    --model-path=/home/${STUDENT_ID}/models/ \
+    --train-batch-size=16 \
+    --val-batch-size=16 \
+    --batch-output-frequency=10 \
+    --max-images=500 \
+    --max-epochs=300
