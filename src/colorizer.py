@@ -1,4 +1,3 @@
-import math
 import time
 
 import torch.optim
@@ -48,14 +47,14 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
         for epoch in range(options.max_epochs):
             train_time, train_loss_G, train_loss_G_GAN, train_loss_G_gen, train_loss_D, train_loss_D_real, \
             train_loss_D_gen = train_GAN_colorizer_epoch(epoch, train_loader, model_gen, model_dis, criterion, l1_loss,
-                                               l1_weight, optimizers, gpu_available, options)
+                                                         l1_weight, optimizers, gpu_available, options)
 
             val_loss_G, val_loss_D = validate_GAN_colorizer_epoch(epoch, val_loader, model_gen, model_dis, criterion,
                                                                   l1_loss, l1_weight, True, gpu_available, options)
             save_epoch_stats_GAN(epoch, epoch_stats, train_loss_G, train_loss_G_GAN, train_loss_G_gen,
                                  train_loss_D, train_loss_D_real, train_loss_D_gen,
                                  val_loss_G, val_loss_D, train_time, options.experiment_output_path)
-            save_model_state(epoch, models, optimizers, options.experiment_output_path)
+            save_model_state(options.experiment_output_path, epoch, models, optimizers)
 
     else:  # resnet or u-net
         # Make model use gpu if available
@@ -70,11 +69,10 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
         epoch_stats = {"epoch": [], "train_time": [], "train_loss": [], 'val_loss': []}
         for epoch in range(options.max_epochs):
             train_time, train_loss = train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer,
-                                                           gpu_available,
-                                                           options)
+                                                           gpu_available, options)
             val_loss = validate_colorizer_epoch(epoch, val_loader, model, criterion, True, gpu_available, options)
-            save_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options.experiment_output_path)
-            save_model_state(epoch, model, optimizer, options.experiment_output_path)
+            save_epoch_stats(epoch, epoch_stats, train_time, train_loss, val_loss, options.experiment_output_path)
+            save_model_state(options.experiment_output_path, epoch, model, optimizer)
 
 
 def train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options):
@@ -238,7 +236,8 @@ def train_GAN_colorizer_epoch(epoch, train_loader, gen_model, dis_model, criteri
         if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
         # convert to FloatTensor since thnn_conv2d_forward is not implemented for type torch.ByteTensor
-        target_img = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type('torch.FloatTensor')
+        target_img = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type(
+            'torch.FloatTensor')
 
         # convert to range [-1, 1]
         target_img = (target_img - 127.5) / 127.5
@@ -362,7 +361,8 @@ def validate_GAN_colorizer_epoch(epoch, val_loader, gen_model, dis_model, criter
         if gpu_available: input_gray, input_ab, img_original = input_gray.cuda(), input_ab.cuda(), img_original.cuda()
 
         # convert to FloatTensor since thnn_conv2d_forward is not implemented for type torch.ByteTensor
-        target_img = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type('torch.FloatTensor')
+        target_img = img_original.type('torch.cuda.FloatTensor') if gpu_available else img_original.type(
+            'torch.FloatTensor')
 
         # convert to range [-1, 1]
         target_img = (target_img - 127.5) / 127.5
