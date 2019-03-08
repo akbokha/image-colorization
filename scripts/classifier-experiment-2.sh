@@ -46,7 +46,7 @@ python /home/${STUDENT_ID}/image-colorization/train.py \
     --dataset-root-path=$DATASET_DIR \
     --dataset-name=places365 \
     --model-path=/home/${STUDENT_ID}/models/ \
-    --train-batch-size=100 \
-    --val-batch-size=100 \
+    --train-batch-size=16 \
+    --val-batch-size=16 \
     --batch-output-frequency=100 \
     --max-epochs=5
