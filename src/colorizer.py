@@ -21,8 +21,8 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
             model_gen.cuda()
             model_dis.cuda()
 
-        optimizer_gen = torch.optim.Adam(model_gen.parameters())
-        optimizer_dis = torch.optim.Adam(model_dis.parameters())
+        optimizer_gen = torch.optim.Adam(model_gen.parameters(), betas=(0.5, 0.999), lr=2e-4)
+        optimizer_dis = torch.optim.Adam(model_dis.parameters(), betas=(0.5, 0.999), lr=2e-4)
 
         optimizers = {
             'generator': optimizer_gen,
