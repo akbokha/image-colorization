@@ -114,7 +114,7 @@ class NazeriDiscriminator32(nn.Module):
         self.conv2 = nn.Conv2d(64, 128, (4, 4), stride=2, padding=1)   #16-8
         self.conv3 = nn.Conv2d(128, 256, (4, 4), stride=2, padding=1)  #8-4
         self.conv4 = nn.Conv2d(256, 512, (4, 4), stride=2, padding=1)  #4-2
-        self.conv5 = nn.Conv2d(512, 1, (2, 2), stride=1, padding=0)  #2-1
+        self.conv5 = nn.Conv2d(512, 1, (2, 2), stride=1, padding=0)    #2-1
         self.sigmoid = nn.Sigmoid()
         
         #Batchnorm
