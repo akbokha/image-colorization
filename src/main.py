@@ -12,7 +12,7 @@ from .options import ModelOptions
 from .utils import *
 
 dataset_names = ['placeholder', 'cifar10', 'places205', 'places365']
-model_names = ['resnet', 'unet32', 'nazerigan32']
+model_names = ['resnet', 'unet32', 'nazerigan32', 'nazerigan224']
 
 def main(options):
     # initialize random seed
@@ -47,21 +47,6 @@ def main(options):
         print('{} is not a valid model. The supported models are: {}'.format(options.model_name, model_names))
         clean_and_exit(options)
 
-    # Create model
-    if options.model_name == 'resnet':
-        model = ResNetColorizationNet()
-    if options.model_name == 'unet32':
-        model = UNet32()
-    if options.model_name == 'nazerigan32':
-        model = UNet32()
-        discriminator = NazeriDiscriminator32()
-        is_gan = True
-    
-    # Make model use gpu if available
-    if gpu_available:
-        model = model.cuda()
-        if is_gan:
-            discriminator = discriminator.cuda()
             
     args = vars(options)
     print('\n------------ Environment -------------')

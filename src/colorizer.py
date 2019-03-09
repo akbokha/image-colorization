@@ -1,3 +1,4 @@
+import math
 import time
 import torch.optim
 
@@ -11,6 +12,8 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
         model = ResNetColorizationNet()
     if options.model_name == 'unet32':
         model = UNet32()
+    if options.model_name == 'unet224':
+        model = UNet224()
 
     # Make model use gpu if available
     if gpu_available:
@@ -26,7 +29,7 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
         train_time, train_loss = train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options)
         val_loss = validate_colorizer_epoch(epoch, val_loader, model, criterion, True, gpu_available, options)
         save_epoch_stats(epoch, epoch_stats, train_time, train_loss, val_loss, options.experiment_output_path)
-        save_model_state(epoch, model, optimizer, options.experiment_output_path)
+        save_model_state(options.experiment_output_path, epoch, model, optimizer)
 
 
 def train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options):
@@ -107,10 +110,10 @@ def validate_colorizer_epoch(epoch, val_loader, model, criterion, save_images, g
     # Switch model to validation mode
     model.eval()
 
-    num_images_saved = 0
-
     # Run through validation set
     start_time = time.time()
+    num_images_saved = 0
+    num_images_per_batch = math.ceil(max(options.max_images / len(val_loader), 1))
     for i, (input_gray, input_ab, img_original) in enumerate(val_loader):
 
         # Use GPU if available
@@ -130,8 +133,9 @@ def validate_colorizer_epoch(epoch, val_loader, model, criterion, save_images, g
         loss_values.update(loss.item(), input_gray.size(0))
 
         # Save images to file
+
         if save_images and num_images_saved < options.max_images:
-            for j in range(min(len(output_ab), options.max_images - num_images_saved)):
+            for j in range(min(num_images_per_batch, options.max_images - num_images_saved)):
                 gray_layer = input_gray[j].detach().cpu()
                 ab_layers = output_ab[j].detach().cpu()
                 save_name = 'img-{}.jpg'.format(i * val_loader.batch_size + j)
