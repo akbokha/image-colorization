@@ -8,6 +8,9 @@
 __pycache__
 .ipynb_checkpoints
 
+# pretrained models
+models
+
 # results
 output
 slurm-*.out

@@ -17,11 +17,14 @@ class ModelOptions:
         parser = argparse.ArgumentParser(description='image-colorization')
 
         parser.add_argument('--seed', type=int, default=0, metavar='S', help='random seed (default: 0)')
+        parser.add_argument('--task', type=str, default='colorizer',
+                            help='The task to execute [colorizer, classifier]')
         parser.add_argument('--experiment-name', type=str, default='experiment_001',
                             help='Experiment name (default: experiment_001)')
         parser.add_argument('--model-name', type=str, default='resnet', help='Model architecture (default: resnet)')
+        parser.add_argument('--model-path', type=str, default='./models', help='Path for pretrained models')
         parser.add_argument('--dataset-name', type=str, default='placeholder',
-                            help='the input dataset to use [placeholder, places365] (default: placeholder)')
+                            help='the dataset to use [placeholder, cifar10, places205, places365] (default: placeholder)')
         parser.add_argument('--dataset-root-path', type=str, default='./data',
                             help='dataset root path (default: ./data)')
         parser.add_argument('--output-root-path', type=str, default='./output',
