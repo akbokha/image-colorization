@@ -123,7 +123,7 @@ class NazeriDiscriminator32(nn.Module):
         self.conv3_bnorm = nn.BatchNorm2d(256)
         self.conv4_bnorm = nn.BatchNorm2d(512)
         
-        def forward(self, x32):
+    def forward(self, x32):
         # Contraction
         x16 = F.leaky_relu(self.conv1(x32), 0.2)
         x16 = self.conv1_bnorm(x16)
@@ -144,7 +144,7 @@ class NazeriDiscriminator32(nn.Module):
         
 class NazeriDiscriminator224(nn.Module):
     def __init__(self):
-        super(NazeriDiscriminator32, self).__init__()
+        super(NazeriDiscriminator224, self).__init__()
         #Convolution and deconvolution
         self.conv1 = nn.Conv2d(1, 64, (4, 4), stride=2, padding=1)    # i = 224, o = 112
         self.conv2 = nn.Conv2d(64, 128, (4, 4), stride=2, padding=1)   # i = 112, o = 56
