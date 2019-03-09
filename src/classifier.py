@@ -36,6 +36,7 @@ def train_classifier(gpu_available, options, train_loader, val_loader):
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
     # Use GPU if available
+    print_ts("Attempt to load model onto GPU.")
     if gpu_available:
         model = model.cuda()
 
@@ -66,14 +67,14 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
 
     # Each epoch has a training and validation phase
     for phase in ['train', 'val']:
+
         if phase == 'train':
             scheduler.step()
             model.train()  # Set model to training mode
-            print('Starting training epoch {}'.format(epoch))
-
+            print_ts('Starting training epoch {}'.format(epoch))
         else:
             model.eval()  # Set model to evaluate mode
-            print('Starting validation epoch {}'.format(epoch))
+            print_ts('Starting validation epoch {}'.format(epoch))
 
         # Prepare value counters and timers
         batch_times, data_times = AverageMeter(), AverageMeter()
@@ -88,6 +89,8 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
         for i, (inputs, labels) in enumerate(loader):
 
             # Use GPU if available
+            if i % options.batch_output_frequency == 0:
+                print_ts('Loading batch data onto GPU')
             if gpu_available:
                 inputs, labels = inputs.cuda(), labels.cuda()
 
@@ -96,11 +99,17 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
             start_time = time.time()
 
             # zero the parameter gradients
+            if i % options.batch_output_frequency == 0:
+                print_ts('Zeroing gradients')
             optimizer.zero_grad()
 
             # forward
             # track history if only in train
             with torch.set_grad_enabled(phase == 'train'):
+
+                if i % options.batch_output_frequency == 0:
+                    print_ts('Forward prop.')
+
                 outputs = model(inputs)
                 _, preds = torch.max(outputs, 1)
                 loss = criterion(outputs, labels)
@@ -112,6 +121,10 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
 
                 # backward + optimize only if in training phase
                 if phase == 'train':
+
+                    if i % options.batch_output_frequency == 0:
+                        print_ts('Back prop.')
+
                     loss.backward()
                     optimizer.step()
 
@@ -121,13 +134,14 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
 
             # Print stats -- in the code below, val refers to value, not validation
             if i % options.batch_output_frequency == 0:
-                print('Epoch: [{0}][{1}/{2}]\t'
-                      'data {data_times.val:.3f} ({data_times.avg:.3f})\t'
-                      'proc {batch_times.val:.3f} ({batch_times.avg:.3f})\t'
-                      'loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t'
-                      'acc ({acc_rate.rate:.4f})'.format(
-                    epoch, i + 1, len(train_loader), batch_times=batch_times,
-                    data_times=data_times, loss_values=loss_values, acc_rate=acc_rate))
+                message = 'Epoch: [{0}][{1}/{2}]\t' \
+                    'data {data_times.val:.3f} ({data_times.avg:.3f})\t' \
+                    'proc {batch_times.val:.3f} ({batch_times.avg:.3f})\t' \
+                    'loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t' \
+                    'acc ({acc_rate.rate:.4f})'.format(
+                        epoch, i + 1, len(loader), batch_times=batch_times,
+                        data_times=data_times, loss_values=loss_values, acc_rate=acc_rate)
+                print_ts(message)
 
         if phase == 'train':
             print('Finished training epoch {}'.format(epoch))
@@ -140,6 +154,8 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
             epoch_val_acc = acc_rate.rate
 
     return epoch_train_time, epoch_train_loss, epoch_train_acc, epoch_val_loss, epoch_val_acc
+
+
 
 
 def save_epoch_stats(epoch, epoch_stats, train_time, train_loss, train_acc, val_loss, val_acc, path):
