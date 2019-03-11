@@ -18,3 +18,4 @@ slurm-*.out
 # datasets
 data/places205/
 data/places365/
+data/places100/
