@@ -15,7 +15,7 @@ from .utils import *
 
 task_names = ['colorizer', 'classifier']
 dataset_names = ['placeholder', 'cifar10', 'places205', 'places365']
-colorizer_model_names = ['resnet', 'unet32', 'nazerigan32', 'nazerigan224']
+colorizer_model_names = ['resnet', 'unet32', 'unet224', 'nazerigan32', 'nazerigan224']
 
 def main(options):
     # initialize random seed
@@ -24,6 +24,7 @@ def main(options):
     torch.manual_seed(options.seed)
     
     gpu_available = torch.cuda.is_available()
+    print(gpu_available)
 
     # Create experiment output directory
     if not os.path.exists(options.experiment_output_path):

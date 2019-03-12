@@ -146,7 +146,7 @@ class NazeriDiscriminator224(nn.Module):
     def __init__(self):
         super(NazeriDiscriminator224, self).__init__()
         #Convolution and deconvolution
-        self.conv1 = nn.Conv2d(1, 64, (4, 4), stride=2, padding=1)    # i = 224, o = 112
+        self.conv1 = nn.Conv2d(3, 64, (4, 4), stride=2, padding=1)    # i = 224, o = 112
         self.conv2 = nn.Conv2d(64, 128, (4, 4), stride=2, padding=1)   # i = 112, o = 56
         self.conv3 = nn.Conv2d(128, 256, (4, 4), stride=2, padding=1) # i = 56, o = 28
         self.conv4 = nn.Conv2d(256, 512, (4, 4), stride=2, padding=1) # i = 28, o = 14
