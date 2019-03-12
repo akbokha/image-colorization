@@ -1,6 +1,6 @@
 import csv
 import os
-
+import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -64,6 +64,16 @@ def save_model_state(path, epoch, model, optimizer=None):
         if optimizer is not None:
             state_dict['optimizer_state'] = optimizer.state_dict()
     torch.save(state_dict, os.path.join(model_state_path, 'state_dict.pth'))
+
+
+def print_ts(message):
+    """
+    Print log message with time stamp prefix
+    :param message:
+    :return:
+    """
+    ts = datetime.datetime.now().strftime('%H:%M:%S')
+    print('{0}: {1}'.format(ts, message))
 
 
 def save_stats(experiment_log_dir, filename, stats_dict, current_epoch, continue_from_mode=False, save_full_dict=True):
