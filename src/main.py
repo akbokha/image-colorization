@@ -14,8 +14,8 @@ from .classifier import train_classifier
 from .utils import *
 
 task_names = ['colorizer', 'classifier']
-dataset_names = ['placeholder', 'cifar10', 'places205', 'places365']
-colorizer_model_names = ['resnet', 'unet32', 'unet224', 'nazerigan32', 'nazerigan224']
+dataset_names = ['placeholder', 'cifar10', 'places100', 'places205', 'places365']
+colorizer_model_names = ['resnet', 'unet32', 'unet224'm 'nazerigan32', 'nazerigan224']
 
 def main(options):
     # initialize random seed
@@ -58,6 +58,10 @@ def main(options):
 
         elif options.dataset_name == 'cifar10':
             train_loader, val_loader = get_cifar10_loaders(
+                options.dataset_path, options.train_batch_size, options.val_batch_size)
+
+        elif options.dataset_name == 'places100':
+            train_loader, val_loader = get_places365_loaders(
                 options.dataset_path, options.train_batch_size, options.val_batch_size)
 
         elif options.dataset_name == 'places205':
