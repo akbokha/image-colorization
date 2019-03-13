@@ -53,7 +53,9 @@ def get_224_train_transforms(for_classification=False):
     ]
 
     if for_classification:
+        # Convert to tensor and normalise using ImageNet stats
         transform_list.append(transforms.ToTensor())
+        transform_list.append(transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
 
     return transforms.Compose(transform_list)
 
@@ -65,7 +67,9 @@ def get_224_val_transforms(for_classification=False):
     ]
 
     if for_classification:
+        # Convert to tensor and normalise using ImageNet stats
         transform_list.append(transforms.ToTensor())
+        transform_list.append(transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
 
     return transforms.Compose(transform_list)
 
