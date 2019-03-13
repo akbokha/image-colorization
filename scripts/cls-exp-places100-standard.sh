@@ -31,7 +31,7 @@ python /home/${STUDENT_ID}/image-colorization/train.py \
     --task=classifier \
     --experiment-name=cls_3 \
     --dataset-name=places100 \
-    --use-dataset-archive=1
+    --use-dataset-archive=1 \
     --model-path=/home/${STUDENT_ID}/models/ \
     --train-batch-size=50 \
     --val-batch-size=50 \
