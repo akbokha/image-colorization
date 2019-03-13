@@ -47,6 +47,9 @@ def unpickle_cifar10(file):
 
 
 def get_224_train_transforms(for_classification=False):
+    """
+    Get list of transforms for training loader
+    """
     transform_list = [
         transforms.RandomSizedCrop(224),
         transforms.RandomHorizontalFlip()
@@ -61,6 +64,9 @@ def get_224_train_transforms(for_classification=False):
 
 
 def get_224_val_transforms(for_classification=False):
+    """
+    Get list of transforms for valkidation loader
+    """
     transform_list = [
         transforms.Scale(256),
         transforms.CenterCrop(224)
@@ -177,10 +183,9 @@ def get_places205_loaders(dataset_path, train_batch_size, val_batch_size):
     return train_loader, val_loader
 
 
-def get_places_loaders(
-        dataset_path, dataset_name, train_batch_size, val_batch_size, use_dataset_archive, for_classification=False):
+def get_places_loaders(dataset_path, train_batch_size, val_batch_size, use_dataset_archive, for_classification=False):
     """
-    Get dataset loaders for one of the Places-based datasets (placeholder, places100, places365)
+    Get training and validation dataset loaders for one of the Places-based datasets (placeholder, places100, places365)
     """
 
     train_transforms = get_224_train_transforms(for_classification)
@@ -209,7 +214,6 @@ def get_places_loaders(
         train_directory = os.path.join(dataset_path, 'train')
         val_directory = os.path.join(dataset_path, 'val')
 
-        train_transforms = get_224_train_transforms(for_classification)
         if for_classification:
             train_imagefolder = datasets.ImageFolder(train_directory, train_transforms)
         else:
@@ -218,7 +222,6 @@ def get_places_loaders(
         train_loader = torch.utils.data.DataLoader(
             train_imagefolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
 
-        val_transforms = get_224_val_transforms(for_classification)
         if for_classification:
             val_imagefolder = datasets.ImageFolder(val_directory, train_transforms)
         else:
@@ -228,6 +231,32 @@ def get_places_loaders(
             val_imagefolder, batch_size=val_batch_size, shuffle=False, num_workers=1)
 
     return train_loader, val_loader
+
+
+def get_places_test_loader(dataset_path, test_batch_size, use_dataset_archive):
+    """
+    Get test dataset loader for one of the Places-based datasets (placeholder, places100, places365)
+    """
+
+    test_transforms = get_224_val_transforms(True)
+
+    if use_dataset_archive:
+        tar_path = dataset_path + '.tar'
+
+        test_tarfolder = TarFolderImageDataset(tar_path, 'test', test_transforms)
+        test_loader = torch.utils.data.DataLoader(
+            test_tarfolder, batch_size=test_batch_size, shuffle=False, num_workers=1)
+
+    else:
+        test_directory = os.path.join(dataset_path, 'test')
+
+        test_imagefolder = datasets.ImageFolder(test_directory, test_transforms)
+        train_loader = torch.utils.data.DataLoader(
+            test_imagefolder, batch_size=test_batch_size, shuffle=False, num_workers=1)
+
+
+
+
 
 
 class GrayscaleImageFolder(datasets.ImageFolder):

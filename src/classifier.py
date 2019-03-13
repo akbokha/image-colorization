@@ -1,14 +1,14 @@
 import os
 import time
-import torch
 from torch import nn, optim
 from torchvision import models
 
 from .utils import *
 
 
-def build_vgg16_model(model_root_path, num_classes):
-    model_path = os.path.join(model_root_path, 'vgg16-397923af.pth')
+def build_vgg16_model(model_path, num_classes):
+    model_path = os.path.join(model_path, 'vgg16-397923af.pth')
+
     vgg16_model = models.vgg16()
     vgg16_model.load_state_dict(torch.load(model_path))
 
@@ -21,9 +21,6 @@ def build_vgg16_model(model_root_path, num_classes):
     features = list(vgg16_model.classifier.children())[:-1]  # Remove last layer
     features.extend([nn.Linear(num_features, num_classes)])
     vgg16_model.classifier = nn.Sequential(*features)  # Replace the model classifier
-
-    model = models.vgg16(pretrained=False)
-    model.classifier[-1] = nn.Linear(in_features=4096, out_features=num_classes)
 
     return vgg16_model
 

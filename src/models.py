@@ -105,4 +105,3 @@ class UNet32(nn.Module):
         x = F.tanh(self.conv5(x))
         #x = self.conv5(x)
         return x
-
