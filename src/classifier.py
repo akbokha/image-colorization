@@ -32,13 +32,14 @@ def train_classifier(gpu_available, options, train_loader, val_loader):
 
     model = build_vgg16_model(options.model_path, options.dataset_num_classes)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), lr=0.01, momentum=0.9)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
     # Use GPU if available
     print_ts("Attempt to load model onto GPU.")
     if gpu_available:
-        model = nn.DataParallel(model).cuda()
+        model = model.cuda()
+        criterion = criterion.cuda()
 
     epoch_stats = {
         "epoch": [],

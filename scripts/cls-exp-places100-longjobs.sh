@@ -32,7 +32,7 @@ python /home/${STUDENT_ID}/image-colorization/train.py \
     --dataset-name=places100 \
     --use-dataset-archive=1 \
     --model-path=/home/${STUDENT_ID}/models/ \
-    --train-batch-size=50 \
-    --val-batch-size=50 \
+    --train-batch-size=16 \
+    --val-batch-size=16 \
     --batch-output-frequency=100 \
     --max-epochs=100
