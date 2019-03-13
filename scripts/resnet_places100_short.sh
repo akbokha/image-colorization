@@ -22,16 +22,33 @@ export PATH=${CUDA_HOME}/bin:${PATH}
 
 export PYTHON_PATH=$PATH
 
+# Set up scratch disk directory
 mkdir -p /disk/scratch/${STUDENT_ID}
-
-
 export TMPDIR=/disk/scratch/${STUDENT_ID}/
 export TMP=/disk/scratch/${STUDENT_ID}/
 
-mkdir -p ${TMP}/data/
-rsync -ua /home/${STUDENT_ID}/image-colorization/data/ ${TMP}/data/
-export DATASET_DIR=${TMP}/data/
+# copy places365 folder structure to scratch disk
+echo "Copying dataset."
+export DATASET_DIR=${TMP}data
+mkdir -p $DATASET_DIR
+rsync -ua /home/${STUDENT_ID}/image-colorization/data/places100 $DATASET_DIR
+echo "DATASET_DIR: $DATASET_DIR"
+
 
 # Activate the relevant virtual environment:
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
-python /home/${STUDENT_ID}/image-colorization/train.py --experiment-name=experiment_001 --model-name=unet32 --dataset-name=cifar10 --train-batch-size=100 --val-batch-size=1000 --batch-output-frequency=10 --max-images=10
+
+# Run script
+echo "Starting training."
+python /home/${STUDENT_ID}/image-colorization/train.py \
+    --task=colorizer \
+    --experiment-name=resnet_places100_short_100e \
+    --model-name=resnet \
+    --dataset-root-path=$DATASET_DIR \
+    --dataset-name=places100 \
+    --model-path=/home/${STUDENT_ID}/models/ \
+    --train-batch-size=100 \
+    --val-batch-size=100 \
+    --batch-output-frequency=10 \
+    --max-images=500 \
+    --max-epochs=100

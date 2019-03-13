@@ -1,6 +1,7 @@
 import os
 import pickle
 import tarfile
+
 import numpy as np
 import torch
 import torch.utils.data
@@ -91,7 +92,7 @@ def get_cifar10_loaders(dataset_path, train_batch_size, val_batch_size):
         data_file = os.path.join(dataset_path, data_batch)
         if os.path.exists(data_file):
             print("Batch {0} present".format(batch_num))
-    
+
     # Used to download the data
     datasets.CIFAR10(root=dataset_path, train=True, download=True)
 
@@ -229,7 +230,6 @@ def get_places_loaders(
 
     return train_loader, val_loader
 
-
 class GrayscaleImageFolder(datasets.ImageFolder):
     """
     Custom images folder, which converts images to grayscale for colorization task.
@@ -250,6 +250,8 @@ class GrayscaleImageFolder(datasets.ImageFolder):
 
             img_gray = rgb2gray(img_original)
             img_gray = torch.from_numpy(img_gray).unsqueeze(0).float()
+
+            img_original = torch.from_numpy(img_original.transpose((2, 0, 1)))
 
         return img_gray, img_ab, img_original
 

@@ -22,16 +22,28 @@ export PATH=${CUDA_HOME}/bin:${PATH}
 
 export PYTHON_PATH=$PATH
 
+# Set up scratch disk directory
 mkdir -p /disk/scratch/${STUDENT_ID}
-
-
 export TMPDIR=/disk/scratch/${STUDENT_ID}/
 export TMP=/disk/scratch/${STUDENT_ID}/
 
-mkdir -p ${TMP}/data/
-rsync -ua /home/${STUDENT_ID}/image-colorization/data/ ${TMP}/data/
-export DATASET_DIR=${TMP}/data/
+mkdir -p ${TMP}/datasets/
+export DATASET_DIR=${TMP}/datasets/
 
 # Activate the relevant virtual environment:
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
-python /home/${STUDENT_ID}/image-colorization/train.py --experiment-name=experiment_001 --model-name=unet32 --dataset-name=cifar10 --train-batch-size=100 --val-batch-size=1000 --batch-output-frequency=10 --max-images=10
+
+# Run script
+echo "Starting training."
+python /home/${STUDENT_ID}/image-colorization/train.py \
+    --task=colorizer \
+    --experiment-name=gan_places100_short_300e_no_cp \
+    --model-name=cgan \
+    --dataset-root-path=$DATASET_DIR \
+    --dataset-name=places100 \
+    --model-path=/home/${STUDENT_ID}/models/ \
+    --train-batch-size=16 \
+    --val-batch-size=16 \
+    --batch-output-frequency=10 \
+    --max-images=500 \
+    --max-epochs=300

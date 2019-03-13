@@ -9,7 +9,7 @@ from .classifier import train_classifier
 
 task_names = ['colorizer', 'classifier']
 dataset_names = ['placeholder', 'cifar10', 'places100', 'places205', 'places365']
-colorizer_model_names = ['resnet', 'unet32']
+colorizer_model_names = ['resnet', 'unet32', 'cgan']
 
 
 def main(options):
