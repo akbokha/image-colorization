@@ -2,6 +2,7 @@ import os
 import torch
 from torch import nn
 from torchvision import models
+from .utils import *
 
 
 def build_vgg16_places100_model(gpu_available, model_path):
@@ -24,5 +25,40 @@ def build_vgg16_places100_model(gpu_available, model_path):
 
 
 def evaluate_si(gpu_available, options, test_loader):
+    """
+    Evaluate classification accuracy for test dataset
+    """
+
     model = build_vgg16_places100_model(gpu_available, options.model_path)
-    print(model)
+
+    top1_acc, top5_acc = RateMeter(), RateMeter()
+    for i, (inputs, targets) in enumerate(test_loader):
+        outputs = model(inputs)
+        acc = get_topk_correct(outputs, targets, ks=(1, 5))
+        top1_acc.update(acc[0], inputs.size(0))
+        top5_acc.update(acc[1], inputs.size(0))
+
+        # Print stats -- in the code below, val refers to value, not validation
+        if i % options.batch_output_frequency == 0:
+            message = '[{0}/{1}]\t' \
+                      'acc@1 {top1_acc.rate:.4f} ({top1_acc.avg_rate:.4f})\t' \
+                      'acc@5 {top5_acc.rate:.4f} ({top5_acc.avg_rate:.4f})'.format(
+                i + 1, len(test_loader), top1_acc=top1_acc, top5_acc=top5_acc)
+            print_ts(message)
+
+
+def get_topk_correct(outputs, targets, ks=(1,)):
+    """
+    Computes the precision@K for the specified values of K
+    """
+    maxk = max(ks)
+    _, pred = outputs.topk(maxk, 1, True, True)
+    pred = pred.t()
+    correct = pred.eq(targets.view(1, -1).expand_as(pred))
+
+    res = []
+    for k in ks:
+        correct_k = correct[:k].view(-1).float().sum(0)
+        res.append(correct_k.item())
+
+    return res

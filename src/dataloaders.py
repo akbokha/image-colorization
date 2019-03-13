@@ -195,40 +195,34 @@ def get_places_loaders(dataset_path, train_batch_size, val_batch_size, use_datas
         tar_path = dataset_path + '.tar'
 
         if for_classification:
-            train_tarfolder = TarFolderImageDataset(tar_path, 'train', train_transforms)
+            train_dataset = TarFolderImageDataset(tar_path, 'train', train_transforms)
         else:
-            train_tarfolder = TarFolderGrayscaleImageDataset(tar_path, 'train', train_transforms)
-
-        train_loader = torch.utils.data.DataLoader(
-            train_tarfolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
+            train_dataset = TarFolderGrayscaleImageDataset(tar_path, 'train', train_transforms)
 
         if for_classification:
-            val_tarfolder = TarFolderImageDataset(tar_path, 'val', val_transforms)
+            val_dataset = TarFolderImageDataset(tar_path, 'val', val_transforms)
         else:
-            val_tarfolder = TarFolderGrayscaleImageDataset(tar_path, 'val', val_transforms)
-
-        val_loader = torch.utils.data.DataLoader(
-            val_tarfolder, batch_size=val_batch_size, shuffle=False, num_workers=1)
+            val_dataset = TarFolderGrayscaleImageDataset(tar_path, 'val', val_transforms)
 
     else:
         train_directory = os.path.join(dataset_path, 'train')
         val_directory = os.path.join(dataset_path, 'val')
 
         if for_classification:
-            train_imagefolder = datasets.ImageFolder(train_directory, train_transforms)
+            train_dataset = datasets.ImageFolder(train_directory, train_transforms)
         else:
-            train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
-
-        train_loader = torch.utils.data.DataLoader(
-            train_imagefolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
+            train_dataset = GrayscaleImageFolder(train_directory, train_transforms)
 
         if for_classification:
-            val_imagefolder = datasets.ImageFolder(val_directory, train_transforms)
+            val_dataset = datasets.ImageFolder(val_directory, train_transforms)
         else:
-            val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
+            val_dataset = GrayscaleImageFolder(val_directory, val_transforms)
 
-        val_loader = torch.utils.data.DataLoader(
-            val_imagefolder, batch_size=val_batch_size, shuffle=False, num_workers=1)
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=train_batch_size, shuffle=True, num_workers=1)
+
+    val_loader = torch.utils.data.DataLoader(
+        val_dataset, batch_size=val_batch_size, shuffle=False, num_workers=1)
 
     return train_loader, val_loader
 
@@ -242,21 +236,15 @@ def get_places_test_loader(dataset_path, test_batch_size, use_dataset_archive):
 
     if use_dataset_archive:
         tar_path = dataset_path + '.tar'
-
-        test_tarfolder = TarFolderImageDataset(tar_path, 'test', test_transforms)
-        test_loader = torch.utils.data.DataLoader(
-            test_tarfolder, batch_size=test_batch_size, shuffle=False, num_workers=1)
-
+        test_dataset = TarFolderImageDataset(tar_path, 'test', test_transforms)
     else:
         test_directory = os.path.join(dataset_path, 'test')
+        test_dataset = datasets.ImageFolder(test_directory, test_transforms)
 
-        test_imagefolder = datasets.ImageFolder(test_directory, test_transforms)
-        train_loader = torch.utils.data.DataLoader(
-            test_imagefolder, batch_size=test_batch_size, shuffle=False, num_workers=1)
+    test_loader = torch.utils.data.DataLoader(
+        test_dataset, batch_size=test_batch_size, shuffle=False, num_workers=1)
 
-
-
-
+    return test_loader
 
 
 class GrayscaleImageFolder(datasets.ImageFolder):

@@ -27,7 +27,7 @@ class AverageMeter(object):
 
 
 class RateMeter(object):
-    '''An easy way to compute and store rates'''
+    '''An easy way to compute and store average and current rates'''
 
     def __init__(self):
         self.reset()
@@ -35,12 +35,17 @@ class RateMeter(object):
     def reset(self):
         self.rate = 0
         self.successes = 0
+        self.total_successes = 0
         self.trials = 0
+        self.total_trials = 0
 
     def update(self, successes, trials):
-        self.successes += successes
-        self.trials += trials
+        self.successes = successes
+        self.total_successes += successes
+        self.trials = trials
+        self.total_trials += trials
         self.rate = self.successes / self.trials
+        self.avg_rate = self.total_successes / self.total_trials
 
 
 def save_model_state(path, epoch, model, optimizer=None):

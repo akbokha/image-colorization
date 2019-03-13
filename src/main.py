@@ -104,8 +104,13 @@ def main(options):
 
     elif options.task == 'si_evaluation':
 
-        test_loader = get_places_test_loader(
-            options.dataset_path, options.val_batch_size, options.use_dataset_archive)
+        if options.dataset_name == 'places100':
+            test_loader = get_places_test_loader(
+                options.dataset_path, options.val_batch_size, options.use_dataset_archive)
+
+        else:
+            print("{} is not a valid dataset for si_evalution task".format(options.dataset_name))
+            clean_and_exit(options)
 
         evaluate_si(gpu_available, options, test_loader)
 

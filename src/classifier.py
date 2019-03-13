@@ -139,7 +139,7 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
                     'data {data_times.val:.3f} ({data_times.avg:.3f})\t' \
                     'proc {batch_times.val:.3f} ({batch_times.avg:.3f})\t' \
                     'loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t' \
-                    'acc ({acc_rate.rate:.4f})'.format(
+                    'acc {acc_rate.rate:.4f} ({acc_rate.avg_rate:.4f})'.format(
                         epoch, i + 1, len(loader), batch_times=batch_times,
                         data_times=data_times, loss_values=loss_values, acc_rate=acc_rate)
                 print_ts(message)
