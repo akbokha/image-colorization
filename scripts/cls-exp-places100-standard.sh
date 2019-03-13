@@ -22,18 +22,6 @@ export PATH=${CUDA_HOME}/bin:${PATH}
 
 export PYTHON_PATH=$PATH
 
-# Set up scratch disk directory
-mkdir -p /disk/scratch/${STUDENT_ID}
-export TMPDIR=/disk/scratch/${STUDENT_ID}
-export TMP=/disk/scratch/${STUDENT_ID}
-
-# copy places365 folder structure to scratch disk
-echo "Copying dataset."
-export DATASET_DIR=${TMP}/data
-mkdir -p $DATASET_DIR
-rsync -ua /home/${STUDENT_ID}/data/places365 $DATASET_DIR
-echo "DATASET_DIR: $DATASET_DIR"
-
 # Activate the relevant virtual environment:
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
@@ -41,9 +29,9 @@ source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 echo "Starting training."
 python /home/${STUDENT_ID}/image-colorization/train.py \
     --task=classifier \
-    --experiment-name=cls_2 \
-    --dataset-root-path=$DATASET_DIR \
-    --dataset-name=places365 \
+    --experiment-name=cls_3 \
+    --dataset-name=places100 \
+    --use-dataset-archive=1 \
     --model-path=/home/${STUDENT_ID}/models/ \
     --train-batch-size=16 \
     --val-batch-size=16 \

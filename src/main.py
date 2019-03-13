@@ -48,24 +48,27 @@ def main(options):
 
         # Create data loaders
         if options.dataset_name == 'placeholder':
-            train_loader, val_loader = get_placeholder_loaders(
-                options.dataset_path, options.train_batch_size, options.val_batch_size)
+            train_loader, val_loader = get_places_loaders(
+                options.dataset_path, options.dataset_name, options.train_batch_size, options.val_batch_size,
+                options.use_dataset_archive)
 
         elif options.dataset_name == 'cifar10':
             train_loader, val_loader = get_cifar10_loaders(
                 options.dataset_path, options.train_batch_size, options.val_batch_size)
 
         elif options.dataset_name == 'places100':
-            train_loader, val_loader = get_places365_loaders(
-                options.dataset_path, options.train_batch_size, options.val_batch_size)
+            train_loader, val_loader = get_places_loaders(
+                options.dataset_path, options.dataset_name, options.train_batch_size, options.val_batch_size,
+                options.use_dataset_archive)
 
         elif options.dataset_name == 'places205':
             train_loader, val_loader = get_places205_loaders(
                 options.dataset_path, options.train_batch_size, options.val_batch_size)
 
         elif options.dataset_name == 'places365':
-            train_loader, val_loader = get_places365_loaders(
-                options.dataset_path, options.train_batch_size, options.val_batch_size)
+            train_loader, val_loader = get_places_loaders(
+                options.dataset_path, options.dataset_name, options.train_batch_size, options.val_batch_size,
+                options.use_dataset_archive)
 
         # Check if specified model is one that is supported by experimentation framework
         if options.model_name not in colorizer_model_names:
@@ -78,13 +81,21 @@ def main(options):
     elif options.task == 'classifier':
 
         if options.dataset_name == 'placeholder':
-            train_loader, val_loader = get_placeholder_loaders(
-                options.dataset_path, options.train_batch_size, options.val_batch_size, for_classification=True)
+            train_loader, val_loader = get_places_loaders(
+                options.dataset_path, options.dataset_name, options.train_batch_size, options.val_batch_size,
+                options.use_dataset_archive, for_classification=True)
             options.dataset_num_classes = 2
 
+        elif options.dataset_name == 'places100':
+            train_loader, val_loader = get_places_loaders(
+                options.dataset_path, options.dataset_name, options.train_batch_size, options.val_batch_size,
+                options.use_dataset_archive, for_classification=True)
+            options.dataset_num_classes = 100
+
         elif options.dataset_name == 'places365':
-            train_loader, val_loader = get_places365_loaders(
-                    options.dataset_path, options.train_batch_size, options.val_batch_size, for_classification=True)
+            train_loader, val_loader = get_places_loaders(
+                options.dataset_path, options.dataset_name, options.train_batch_size, options.val_batch_size,
+                options.use_dataset_archive, for_classification=True)
             options.dataset_num_classes = 365
 
         else:

@@ -27,6 +27,8 @@ class ModelOptions:
                             help='the dataset to use [placeholder, cifar10, places100, places205, places365] (default: placeholder)')
         parser.add_argument('--dataset-root-path', type=str, default='./data',
                             help='dataset root path (default: ./data)')
+        parser.add_argument('--use-dataset-archive', type=str2bool, default=False,
+                            help='Load dataset from TAR archive (default: False)')
         parser.add_argument('--output-root-path', type=str, default='./output',
                             help='models, stats etc. are saved here (default: ./output)')
         parser.add_argument('--max-epochs', type=int, default='5', help='max number of epoch to train for')
