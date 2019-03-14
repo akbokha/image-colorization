@@ -13,7 +13,8 @@ models
 
 # results
 output
-slurm-*.out
+eval
+slurm-*.out 
 
 # datasets
 data/*.tar

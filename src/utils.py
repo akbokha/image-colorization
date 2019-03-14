@@ -27,7 +27,7 @@ class AverageMeter(object):
 
 
 class RateMeter(object):
-    '''An easy way to compute and store rates'''
+    '''An easy way to compute and store average and current rates'''
 
     def __init__(self):
         self.reset()
@@ -35,12 +35,17 @@ class RateMeter(object):
     def reset(self):
         self.rate = 0
         self.successes = 0
+        self.total_successes = 0
         self.trials = 0
+        self.total_trials = 0
 
     def update(self, successes, trials):
-        self.successes += successes
-        self.trials += trials
+        self.successes = successes
+        self.total_successes += successes
+        self.trials = trials
+        self.total_trials += trials
         self.rate = self.successes / self.trials
+        self.avg_rate = self.total_successes / self.total_trials
 
 
 def save_model_state(path, epoch, model, optimizer=None):
@@ -107,6 +112,15 @@ def save_stats(experiment_log_dir, filename, stats_dict, current_epoch, continue
             writer.writerow(row_to_add)
 
     return summary_filename
+
+
+def combine_lab_image_layers(grayscale_layer, ab_layers):
+    color_image = torch.cat((grayscale_layer, ab_layers), 0).numpy()  # combine channels
+    color_image = color_image.transpose((1, 2, 0))  # transpose for matplotlib
+    color_image[:, :, 0:1] = color_image[:, :, 0:1] * 100 # rescale for matplotlib
+    color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
+    color_image = lab2rgb(color_image.astype(np.float64))
+    return color_image
 
 
 def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, save_name, save_static_images=False,
