@@ -220,19 +220,30 @@ def get_places_loaders(dataset_path, train_batch_size, val_batch_size, use_datas
     return train_loader, val_loader
 
 
-def get_places_test_loader(dataset_path, test_batch_size, use_dataset_archive):
+def get_places_test_loader(dataset_path, test_batch_size, use_dataset_archive, for_classification=False):
     """
     Get test dataset loader for one of the Places-based datasets (placeholder, places100, places365)
     """
 
-    test_transforms = get_224_transforms(augment=False, to_tensor=False, normalise=False)
+    if for_classification:
+        test_transforms = get_224_transforms(augment=False, to_tensor=True, normalise=True)
+    else:
+        test_transforms = get_224_transforms(augment=False, to_tensor=False, normalise=False)
 
     if use_dataset_archive:
         tar_path = dataset_path + '.tar'
-        test_dataset = TarFolderGrayscaleImageDataset(tar_path, 'test', test_transforms)
+
+        if for_classification:
+            test_dataset = TarFolderImageDataset(tar_path, 'test', test_transforms)
+        else:
+            test_dataset = TarFolderGrayscaleImageDataset(tar_path, 'test', test_transforms)
     else:
         test_directory = os.path.join(dataset_path, 'test')
-        test_dataset = GrayscaleImageFolder(test_directory, test_transforms)
+
+        if for_classification:
+            test_dataset = datasets.ImageFolder(test_directory, test_transforms)
+        else:
+            test_dataset = GrayscaleImageFolder(test_directory, test_transforms)
 
     test_loader = torch.utils.data.DataLoader(
         test_dataset, batch_size=test_batch_size, shuffle=False, num_workers=1)

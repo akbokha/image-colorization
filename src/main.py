@@ -110,13 +110,13 @@ def main(options):
 
 
     elif options.task == 'eval-si':
-
-        if options.dataset_name == 'places100':
-            test_loader = get_places_test_loader(
-                options.dataset_path, options.val_batch_size, options.use_dataset_archive)
+        if options.eval_type == 'colorized':
+            dataset_path = os.path.join('./eval', options.model_name)
         else:
-            print("{} is not a valid dataset for si_evalution task".format(options.dataset_name))
-            clean_and_exit(options)
+            dataset_path = os.path.join('./eval', options.eval_type)
+
+        test_loader = get_places_test_loader(
+            dataset_path, options.val_batch_size, False, for_classification=True)
 
         evaluate_si(gpu_available, options, test_loader)
 

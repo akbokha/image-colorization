@@ -20,10 +20,11 @@ def build_colorization_model(gpu_available, model_path, model_name):
 
     if model_name == 'resnet':
         model = ResNetColorizationNet()
-        model.load_state_dict(model_state)
-    else:
-        # TODO: support other models
-        model = None
+
+    elif model_name == 'unet32':
+        model = UNet32()
+
+    model.load_state_dict(model_state)
 
     # Use GPU if available
     if gpu_available:
@@ -53,7 +54,7 @@ def generate_eval_set(gpu_available, options, test_loader):
     class_idx_to_label = get_idx_to_label(test_loader.dataset)
 
     if options.eval_type == 'original':
-        path = os.path.join('./eval/', options.eval_type)
+        path = os.path.join('./eval/', options.eval_type, 'test')
 
         for i, (layers_grayscale, layers_ab, imgs_original, targets) in enumerate(test_loader):
             for j in range(imgs_original.shape[0]):
@@ -63,7 +64,7 @@ def generate_eval_set(gpu_available, options, test_loader):
                 save_image(img_data, path, label, file_name)
 
     elif options.eval_type == 'grayscale':
-        path = os.path.join('./eval/', options.eval_type)
+        path = os.path.join('./eval/', options.eval_type ,'test')
 
         for i, (layers_grayscale, layers_ab, imgs_original, targets) in enumerate(test_loader):
             for j in range(layers_grayscale.shape[0]):
@@ -73,7 +74,7 @@ def generate_eval_set(gpu_available, options, test_loader):
                 save_image(img_data, path, label, file_name)
 
     elif options.eval_type == 'colorized':
-        path = os.path.join('./eval/', options.model_name)
+        path = os.path.join('./eval/', options.model_name, 'test')
         model = build_colorization_model(gpu_available, options.model_path, options.model_name)
 
         for i, (layers_grayscale, layers_ab, imgs_original, targets) in enumerate(test_loader):

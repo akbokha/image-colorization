@@ -41,10 +41,14 @@ def evaluate_si(gpu_available, options, test_loader):
         # Print stats -- in the code below, val refers to value, not validation
         if i % options.batch_output_frequency == 0:
             message = '[{0}/{1}]\t' \
-                      'acc@1 {top1_acc.rate:.4f} ({top1_acc.avg_rate:.4f})\t' \
-                      'acc@5 {top5_acc.rate:.4f} ({top5_acc.avg_rate:.4f})'.format(
+                      'top1_acc {top1_acc.rate:.4f} ({top1_acc.avg_rate:.4f})\t' \
+                      'top5_acc {top5_acc.rate:.4f} ({top5_acc.avg_rate:.4f})'.format(
                 i + 1, len(test_loader), top1_acc=top1_acc, top5_acc=top5_acc)
             print_ts(message)
+
+    output_path = options.experiment_output_path
+    epoch_stats = { 'top1_acc': [top1_acc.avg_rate], 'top5_acc': [top5_acc.avg_rate] }
+    save_stats(output_path, 'si_accuracy.csv', epoch_stats, 1)
 
 
 def get_topk_correct(outputs, targets, ks=(1,)):
