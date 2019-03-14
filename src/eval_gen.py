@@ -57,7 +57,7 @@ def generate_eval_set(gpu_available, options, test_loader):
 
         for i, (layers_grayscale, layers_ab, imgs_original, targets) in enumerate(test_loader):
             for j in range(imgs_original.shape[0]):
-                img_data = imgs_original[j].detach().cpu().numpy()
+                img_data = imgs_original[j].detach().cpu().numpy().transpose(1, 2, 0)
                 label = class_idx_to_label[targets[j].item()]
                 file_name = 'img-{0:04d}.jpg'.format(i * test_loader.batch_size + j)
                 save_image(img_data, path, label, file_name)

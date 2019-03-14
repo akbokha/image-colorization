@@ -1,6 +1,7 @@
 import os
 import pickle
 import tarfile
+
 import numpy as np
 import torch
 import torch.utils.data
@@ -85,7 +86,7 @@ def get_cifar10_loaders(dataset_path, train_batch_size, val_batch_size):
         data_file = os.path.join(dataset_path, data_batch)
         if os.path.exists(data_file):
             print("Batch {0} present".format(batch_num))
-    
+
     # Used to download the data
     datasets.CIFAR10(root=dataset_path, train=True, download=True)
 
@@ -262,6 +263,8 @@ class GrayscaleImageFolder(datasets.ImageFolder):
         img_gray = rgb2gray(img_original)
         img_gray = torch.from_numpy(img_gray).unsqueeze(0).float()
 
+        img_original = torch.from_numpy(img_original.transpose((2, 0, 1)))
+
         return img_gray, img_ab, img_original, target
 
 
@@ -359,13 +362,13 @@ class TarFolderGrayscaleImageDataset(TarFolderImageDataset):
     """
 
     def __getitem__(self, idx):
-        input = self.inputs[idx]
+        img_original = self.inputs[idx]
         target = self.targets[idx]
 
         if self.transform is not None:
-            input = self.transform(input)
+            img_original = self.transform(img_original)
 
-        input = np.asarray(input)
+        img_original = np.asarray(img_original)
 
         img_lab = rgb2lab(input)
         img_lab = (img_lab + 128) / 255
@@ -376,4 +379,6 @@ class TarFolderGrayscaleImageDataset(TarFolderImageDataset):
         img_gray = rgb2gray(input)
         img_gray = torch.from_numpy(img_gray).unsqueeze(0).float()
 
-        return img_gray, img_ab, input, target
+        img_original = torch.from_numpy(img_original.transpose((2, 0, 1)))
+
+        return img_gray, img_ab, img_original, target

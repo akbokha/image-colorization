@@ -16,7 +16,7 @@ dataset_label_counts = {
     'places100': 100,
     'places365': 365
 }
-colorizer_model_names = ['resnet', 'unet32']
+colorizer_model_names = ['resnet', 'unet32', 'cgan']
 
 
 def main(options):
