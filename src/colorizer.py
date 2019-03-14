@@ -44,7 +44,9 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
             save_model_state(options.experiment_output_path, epoch, model, optimizer)
     
     else:
-        criterionBCE = nn.BCELoss().cuda() if gpu_available else nn.BCELoss()
+        criterionBCE = nn.BCEWithLogitsLoss().cuda() if gpu_available else nn.BCEWithLogitsLoss()
+        criterionL1 = nn.L1Loss().cuda() if gpu_available else nn.L1Loss()
+        L1 = 100
         criterionMSE = nn.MSELoss().cuda() if gpu_available else nn.MSELoss()
         optimizerG = torch.optim.Adam(model.parameters(), betas=(0.5, 0.999), lr=0.0002)
         optimizerD = torch.optim.Adam(discriminator.parameters(), betas=(0.5, 0.999), lr=0.0002)
@@ -52,7 +54,7 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
         # train model
         epoch_stats = {"epoch": [], "train_time": [], "train_loss": [], 'val_loss': []}
         for epoch in range(options.max_epochs):
-            train_time, train_loss = train_gan_colorizer_epoch(epoch, train_loader, model, discriminator, criterionBCE, optimizerG, optimizerD, gpu_available, options)
+            train_time, train_loss = train_gan_colorizer_epoch(epoch, train_loader, model, discriminator, criterionBCE, criterionL1, L1, optimizerG, optimizerD, gpu_available, options)
             val_loss = validate_gan_colorizer_epoch(epoch, val_loader, model, discriminator, criterionMSE, True, gpu_available, options)
             state_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options)
             save_model_state(epoch, model, optimizer, options)
@@ -189,7 +191,7 @@ def validate_colorizer_epoch(epoch, val_loader, model, criterion, save_images, g
 
     return loss_values.avg
 
-def train_gan_colorizer_epoch(epoch, train_loader, generator, discriminator, criterion, optimizerG, optimizerD, gpu_available, options):
+def train_gan_colorizer_epoch(epoch, train_loader, generator, discriminator, criterionBCE, criterionL1, L1, optimizerG, optimizerD, gpu_available, options):
     """
     Train model on data in train_loader
     """
@@ -233,7 +235,7 @@ def train_gan_colorizer_epoch(epoch, train_loader, generator, discriminator, cri
         
         # Train discriminator with all real batch
         output_real = discriminator(torch.cat((input_gray, input_ab), dim=1))
-        loss_real = criterion(output_real, real_labels)
+        loss_real = criterionBCE(output_real[:,0,0,0], real_labels)
         loss_real.backward()
         
         # Generate fake batch
@@ -241,7 +243,7 @@ def train_gan_colorizer_epoch(epoch, train_loader, generator, discriminator, cri
         
         # Train discriminator with all fake batch
         output_fake = discriminator(torch.cat((input_gray, fakes), dim=1))
-        loss_fake = criterion(output_fake, fake_labels)
+        loss_fake = criterionBCE(output_fake[:,0,0,0], fake_labels)
         loss_fake.backward(retain_graph=True)
         
         # Calculate full loss discriminator
@@ -250,7 +252,9 @@ def train_gan_colorizer_epoch(epoch, train_loader, generator, discriminator, cri
         optimizerD.step()
         
         # Calculate full loss generator
-        loss_generator = criterion(output_fake, real_labels)
+        loss_generator_BCE = criterionBCE(output_fake[:,0,0,0], real_labels)
+        loss_generator_L1 = criterionL1(output_fake, real_labels) * L1
+        loss_generator = loss_generator_BCE + loss_generator_L1
         loss_generator.backward()
         # Update generator weights
         optimizerG.step()

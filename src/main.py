@@ -15,7 +15,7 @@ from .utils import *
 
 task_names = ['colorizer', 'classifier']
 dataset_names = ['placeholder', 'cifar10', 'places100', 'places205', 'places365']
-colorizer_model_names = ['resnet', 'unet32', 'unet224'm 'nazerigan32', 'nazerigan224']
+colorizer_model_names = ['resnet', 'unet32', 'unet224', 'nazerigan32', 'nazerigan224']
 
 def main(options):
     # initialize random seed
