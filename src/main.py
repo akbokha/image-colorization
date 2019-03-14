@@ -6,10 +6,16 @@ from .options import ModelOptions
 from .utils import *
 from .colorizer import train_colorizer
 from .classifier import train_classifier
-from .si_evaluation import evaluate_si
+from .eval_gen import generate_eval_set
+from .eval_si import evaluate_si
 
-task_names = ['colorizer', 'classifier', 'si_evaluation']
+task_names = ['colorizer', 'classifier', 'eval-gen', 'eval-si']
 dataset_names = ['placeholder', 'cifar10', 'places100', 'places205', 'places365']
+dataset_label_counts = {
+    'placeholder': 2,
+    'places100': 100,
+    'places365': 365
+}
 colorizer_model_names = ['resnet', 'unet32']
 
 
@@ -78,23 +84,12 @@ def main(options):
 
     elif options.task == 'classifier':
 
-        if options.dataset_name == 'placeholder':
-            train_loader, val_loader = get_places_loaders(
-                options.dataset_path, options.train_batch_size, options.val_batch_size, options.use_dataset_archive,
-                for_classification=True)
-            options.dataset_num_classes = 2
 
-        elif options.dataset_name == 'places100':
+        if options.dataset_name in ['placeholder', 'places100', 'places365']:
             train_loader, val_loader = get_places_loaders(
                 options.dataset_path, options.train_batch_size, options.val_batch_size, options.use_dataset_archive,
                 for_classification=True)
-            options.dataset_num_classes = 100
-
-        elif options.dataset_name == 'places365':
-            train_loader, val_loader = get_places_loaders(
-                options.dataset_path, options.train_batch_size, options.val_batch_size, options.use_dataset_archive,
-                for_classification=True)
-            options.dataset_num_classes = 365
+            options.dataset_num_classes = dataset_label_counts[options.dataset_name]
 
         else:
             print("{} is not a valid dataset for classifier task".format(options.dataset_name))
@@ -102,12 +97,23 @@ def main(options):
 
         train_classifier(gpu_available, options, train_loader, val_loader)
 
-    elif options.task == 'si_evaluation':
+    elif options.task == 'eval-gen':
+
+        if options.dataset_name in ['placeholder', 'places100']:
+            test_loader = get_places_test_loader(
+                options.dataset_path, options.val_batch_size, options.use_dataset_archive)
+        else:
+            print("{} is not a valid dataset for eval-gen task".format(options.dataset_name))
+            clean_and_exit(options)
+
+        generate_eval_set(gpu_available, options, test_loader)
+
+
+    elif options.task == 'eval-si':
 
         if options.dataset_name == 'places100':
             test_loader = get_places_test_loader(
                 options.dataset_path, options.val_batch_size, options.use_dataset_archive)
-
         else:
             print("{} is not a valid dataset for si_evalution task".format(options.dataset_name))
             clean_and_exit(options)

@@ -18,7 +18,7 @@ class ModelOptions:
 
         parser.add_argument('--seed', type=int, default=0, metavar='S', help='random seed (default: 0)')
         parser.add_argument('--task', type=str, default='colorizer',
-                            help='The task to execute [colorizer, classifier, si_evaluation]')
+                            help='The task to execute [colorizer, classifier, eval-gen, eval-si]')
         parser.add_argument('--experiment-name', type=str, default='experiment_001',
                             help='Experiment name (default: experiment_001)')
         parser.add_argument('--model-name', type=str, default='resnet',
@@ -39,8 +39,8 @@ class ModelOptions:
                             help='frequency with which to output batch stats')
         parser.add_argument('--max-images', type=int, default=10,
                             help='maximum number of images from the validation set to be saved')
-        parser.add_argument('--si_task', type=str, default='original',
-                            help='the type of sem. int. task to perform [original, grayscale, colorized]')
+        parser.add_argument('--eval-type', type=str, default='original',
+                            help='the type of eval task to perform [original, grayscale, colorized]')
 
         self._parser = parser
 

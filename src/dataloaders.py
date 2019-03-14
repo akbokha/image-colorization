@@ -46,35 +46,23 @@ def unpickle_cifar10(file):
     return dict[b"data"]
 
 
-def get_224_train_transforms(for_classification=False):
+def get_224_transforms(augment=False, to_tensor=False, normalise=False):
     """
-    Get list of transforms for training loader
+    Get customisable list of transforms for 224 image size
     """
-    transform_list = [
-        transforms.RandomSizedCrop(224),
-        transforms.RandomHorizontalFlip()
-    ]
+    transform_list = []
+    if augment:
+        transform_list.append(transforms.RandomSizedCrop(224)),
+        transform_list.append(transforms.RandomHorizontalFlip())
+    else:
+        transform_list.append(transforms.Scale(256)),
+        transform_list.append(transforms.CenterCrop(224))
 
-    if for_classification:
-        # Convert to tensor and normalise using ImageNet stats
+    if to_tensor:
         transform_list.append(transforms.ToTensor())
-        transform_list.append(transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
 
-    return transforms.Compose(transform_list)
-
-
-def get_224_val_transforms(for_classification=False):
-    """
-    Get list of transforms for valkidation loader
-    """
-    transform_list = [
-        transforms.Scale(256),
-        transforms.CenterCrop(224)
-    ]
-
-    if for_classification:
-        # Convert to tensor and normalise using ImageNet stats
-        transform_list.append(transforms.ToTensor())
+    if normalise:
+        # Normalise using ImageNet stats
         transform_list.append(transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
 
     return transforms.Compose(transform_list)
@@ -170,12 +158,12 @@ def get_places205_loaders(dataset_path, train_batch_size, val_batch_size):
         for file in to_be_removed_files:
             os.remove(os.path.join(dataset_path, file))
 
-    train_transforms = get_224_train_transforms()
+    train_transforms = get_224_transforms(augment=True, to_tensor=False, normalise=False)
     train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
     train_loader = torch.utils.data.DataLoader(
         train_imagefolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
 
-    val_transforms = get_224_val_transforms()
+    val_transforms = get_224_transforms(augment=False, to_tensor=False, normalise=False)
     val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
     val_loader = torch.utils.data.DataLoader(
         val_imagefolder, batch_size=val_batch_size, shuffle=False, num_workers=1)
@@ -188,8 +176,12 @@ def get_places_loaders(dataset_path, train_batch_size, val_batch_size, use_datas
     Get training and validation dataset loaders for one of the Places-based datasets (placeholder, places100, places365)
     """
 
-    train_transforms = get_224_train_transforms(for_classification)
-    val_transforms = get_224_val_transforms(for_classification)
+    if for_classification:
+        train_transforms = get_224_transforms(augment=True, to_tensor=True, normalise=True)
+        val_transforms = get_224_transforms(augment=False, to_tensor=True, normalise=True)
+    else:
+        train_transforms = get_224_transforms(augment=True, to_tensor=False, normalise=False)
+        val_transforms = get_224_transforms(augment=False, to_tensor=False, normalise=False)
 
     if use_dataset_archive:
         tar_path = dataset_path + '.tar'
@@ -214,7 +206,7 @@ def get_places_loaders(dataset_path, train_batch_size, val_batch_size, use_datas
             train_dataset = GrayscaleImageFolder(train_directory, train_transforms)
 
         if for_classification:
-            val_dataset = datasets.ImageFolder(val_directory, train_transforms)
+            val_dataset = datasets.ImageFolder(val_directory, val_transforms)
         else:
             val_dataset = GrayscaleImageFolder(val_directory, val_transforms)
 
@@ -232,7 +224,7 @@ def get_places_test_loader(dataset_path, test_batch_size, use_dataset_archive):
     Get test dataset loader for one of the Places-based datasets (placeholder, places100, places365)
     """
 
-    test_transforms = get_224_val_transforms(True)
+    test_transforms = get_224_transforms(augment=False, to_tensor=True, normalise=False)
 
     if use_dataset_archive:
         tar_path = dataset_path + '.tar'
@@ -312,19 +304,26 @@ class TarFolderImageDataset(torch.utils.data.Dataset):
     Dataset based on tar archived folder structure.
     """
 
-    def pil_loader(file):
-        img = Image.open(file)
-        return img.convert('RGB')
+    def build_class_labels(self, tar):
+        class_labels = []
+        for member in tar.getmembers():
+            path_elems = member.name.split('/')
+            if len(path_elems) == 3 and path_elems[1] == self.dataset_type and member.isdir():
+                class_labels.append(path_elems[2])
+
+        class_labels.sort()
+        return {class_labels[i]: i for i in range(len(class_labels))}
+
 
     def __init__(self, tar_path, dataset_type='train', transform=None):
         self.dataset_type = dataset_type
         self.transform = transform
-        self.class_labels = {}
         self.inputs = []
         self.targets = []
 
         with tarfile.open(tar_path, 'r') as tar:
-            class_label_max_index = 0
+            self.class_to_idx = self.build_class_labels(tar)
+
             for member in tar.getmembers():
                 path_elems = member.name.split('/')
 
@@ -338,12 +337,7 @@ class TarFolderImageDataset(torch.utils.data.Dataset):
                     img = Image.open(f)
                     img = img.convert('RGB')
                     self.inputs.append(img)
-
-                    class_label = path_elems[2]
-                    if class_label not in self.class_labels:
-                        self.class_labels[class_label] = class_label_max_index
-                        class_label_max_index += 1
-                    self.targets.append(self.class_labels[class_label])
+                    self.targets.append(self.class_to_idx[path_elems[2]])
 
     def __len__(self):
         return len(self.inputs)
