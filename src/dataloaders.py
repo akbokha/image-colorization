@@ -224,14 +224,14 @@ def get_places_test_loader(dataset_path, test_batch_size, use_dataset_archive):
     Get test dataset loader for one of the Places-based datasets (placeholder, places100, places365)
     """
 
-    test_transforms = get_224_transforms(augment=False, to_tensor=True, normalise=False)
+    test_transforms = get_224_transforms(augment=False, to_tensor=False, normalise=False)
 
     if use_dataset_archive:
         tar_path = dataset_path + '.tar'
-        test_dataset = TarFolderImageDataset(tar_path, 'test', test_transforms)
+        test_dataset = TarFolderGrayscaleImageDataset(tar_path, 'test', test_transforms)
     else:
         test_directory = os.path.join(dataset_path, 'test')
-        test_dataset = datasets.ImageFolder(test_directory, test_transforms)
+        test_dataset = GrayscaleImageFolder(test_directory, test_transforms)
 
     test_loader = torch.utils.data.DataLoader(
         test_dataset, batch_size=test_batch_size, shuffle=False, num_workers=1)
@@ -246,21 +246,23 @@ class GrayscaleImageFolder(datasets.ImageFolder):
 
     def __getitem__(self, index):
         path, target = self.imgs[index]
-        img = self.loader(path)
+        img_original = self.loader(path)
+
         if self.transform is not None:
-            img_original = self.transform(img)
-            img_original = np.asarray(img_original)
+            img_original = self.transform(img_original)
 
-            img_lab = rgb2lab(img_original)
-            img_lab = (img_lab + 128) / 255
+        img_original = np.asarray(img_original)
 
-            img_ab = img_lab[:, :, 1:3]
-            img_ab = torch.from_numpy(img_ab.transpose((2, 0, 1))).float()
+        img_lab = rgb2lab(img_original)
+        img_lab = (img_lab + 128) / 255
 
-            img_gray = rgb2gray(img_original)
-            img_gray = torch.from_numpy(img_gray).unsqueeze(0).float()
+        img_ab = img_lab[:, :, 1:3]
+        img_ab = torch.from_numpy(img_ab.transpose((2, 0, 1))).float()
 
-        return img_gray, img_ab, img_original
+        img_gray = rgb2gray(img_original)
+        img_gray = torch.from_numpy(img_gray).unsqueeze(0).float()
+
+        return img_gray, img_ab, img_original, target
 
 
 class CIFAR10ImageDataSet(torch.utils.data.Dataset):
@@ -356,8 +358,9 @@ class TarFolderGrayscaleImageDataset(TarFolderImageDataset):
     Dataset based on tar archived folder structure which converts images to grayscale for colorization task.
     """
 
-    def __getitem__(self, index):
-        input = self.inputs[index]
+    def __getitem__(self, idx):
+        input = self.inputs[idx]
+        target = self.targets[idx]
 
         if self.transform is not None:
             input = self.transform(input)
@@ -373,4 +376,4 @@ class TarFolderGrayscaleImageDataset(TarFolderImageDataset):
         img_gray = rgb2gray(input)
         img_gray = torch.from_numpy(img_gray).unsqueeze(0).float()
 
-        return img_gray, img_ab, input
+        return img_gray, img_ab, input, target

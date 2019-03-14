@@ -45,7 +45,7 @@ def train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer, gpu_
 
     # Train for single epoch
     start_time = time.time()
-    for i, (input_gray, input_ab, img_original) in enumerate(train_loader):
+    for i, (input_gray, input_ab, img_original, target) in enumerate(train_loader):
 
         # Use GPU if available
         if gpu_available:
@@ -112,7 +112,7 @@ def validate_colorizer_epoch(epoch, val_loader, model, criterion, save_images, g
     start_time = time.time()
     num_images_saved = 0
     num_images_per_batch = math.ceil(max(options.max_images / len(val_loader), 1))
-    for i, (input_gray, input_ab, img_original) in enumerate(val_loader):
+    for i, (input_gray, input_ab, img_original, target) in enumerate(val_loader):
 
         # Use GPU if available
         if gpu_available:
