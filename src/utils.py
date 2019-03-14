@@ -107,6 +107,15 @@ def save_stats(experiment_log_dir, filename, stats_dict, current_epoch, continue
     return summary_filename
 
 
+def combine_lab_image_layers(grayscale_layer, ab_layers):
+    color_image = torch.cat((grayscale_layer, ab_layers), 0).numpy()  # combine channels
+    color_image = color_image.transpose((1, 2, 0))  # transpose for matplotlib
+    color_image[:, :, 0:1] = color_image[:, :, 0:1] * 100 # rescale for matplotlib
+    color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
+    color_image = lab2rgb(color_image.astype(np.float64))
+    return color_image
+
+
 def save_colorized_images(grayscale_layer, ab_layers, img_original, save_paths, save_name, save_static_images=False):
     """
     Save grayscale and colorised versions of selected image
