@@ -29,11 +29,11 @@ source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 echo "Starting training."
 python /home/${STUDENT_ID}/image-colorization/train.py \
     --task=classifier \
-    --experiment-name=cls_3 \
+    --experiment-name=cls_4 \
     --dataset-name=places100 \
     --use-dataset-archive=1 \
     --model-path=/home/${STUDENT_ID}/models/ \
     --train-batch-size=16 \
     --val-batch-size=16 \
     --batch-output-frequency=100 \
-    --max-epochs=5
+    --max-epochs=50
