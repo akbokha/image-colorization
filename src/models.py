@@ -105,6 +105,7 @@ class UNet32(nn.Module):
 
         # cross-channel parametric pooling
         x = F.tanh(self.conv5(x))
+
         # x = self.conv5(x)
         return x
 
