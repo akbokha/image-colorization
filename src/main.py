@@ -8,8 +8,10 @@ from .colorizer import train_colorizer
 from .classifier import train_classifier
 from .eval_gen import generate_eval_set
 from .eval_si import evaluate_si
+from .ps.dist_model import DistModel
+from .ps import ps_util
 
-task_names = ['colorizer', 'classifier', 'eval-gen', 'eval-si']
+task_names = ['colorizer', 'classifier', 'eval-gen', 'eval-si', 'eval-ps']
 dataset_names = ['placeholder', 'cifar10', 'places100', 'places205', 'places365']
 dataset_label_counts = {
     'placeholder': 2,
@@ -119,6 +121,20 @@ def main(options):
             dataset_path, options.val_batch_size, False, for_classification=True)
 
         evaluate_si(gpu_available, options, test_loader)
+
+    elif options.task == 'eval-ps':
+        model_path = os.path.join(options.model_path, 'alex.pth')
+        model = DistModel()
+        model.initialize(model='net-lin', net='alex', model_path=model_path, use_gpu=gpu_available)
+
+        # Load images
+        import cv2
+        img0 = ps_util.im2tensor(ps_util.load_image('./eval/original/test/airfield/img-0000.jpg'))  # RGB image from [-1,1]
+        img1 = ps_util.im2tensor(ps_util.load_image('./eval/original/test/airfield/img-0001.jpg'))
+
+        # Compute distance
+        dist01 = model.forward(img0, img1)
+        print('Distance: %.3f' % dist01)
 
 
 def clean_and_exit(options):
