@@ -148,11 +148,11 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
             print('Finished training epoch {}'.format(epoch))
             epoch_train_time = batch_times.sum + data_times.sum
             epoch_train_loss = loss_values.avg
-            epoch_train_acc = acc_rate.rate
+            epoch_train_acc = acc_rate.avg_rate
         else:
             print('Finished validation epoch {}'.format(epoch))
             epoch_val_loss = loss_values.avg
-            epoch_val_acc = acc_rate.rate
+            epoch_val_acc = acc_rate.avg_rate
 
     return epoch_train_time, epoch_train_loss, epoch_train_acc, epoch_val_loss, epoch_val_acc
 
