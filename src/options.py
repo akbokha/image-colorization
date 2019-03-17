@@ -39,6 +39,8 @@ class ModelOptions:
                             help='frequency with which to output batch stats')
         parser.add_argument('--max-images', type=int, default=10,
                             help='maximum number of images from the validation set to be saved')
+        parser.add_argument('--eval-root-path', type=str, default='./eval',
+                            help='the root path for evaluation images')
         parser.add_argument('--eval-type', type=str, default='original',
                             help='the type of eval task to perform [original, grayscale, colorized]')
 

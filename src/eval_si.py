@@ -15,7 +15,7 @@ def build_vgg16_places100_model(gpu_available, model_path):
     vgg16_model.classifier = nn.Sequential(*features)  # Replace the model classifier
 
     # Load trained weights
-    model_path = os.path.join(model_path, 'vgg16_places100.pth')
+    model_path = os.path.join(model_path, 'vgg16-places100.pth')
     if gpu_available:
         model_state = torch.load(model_path)['model_state']
     else:

@@ -8,8 +8,9 @@ from .colorizer import train_colorizer
 from .classifier import train_classifier
 from .eval_gen import generate_eval_set
 from .eval_si import evaluate_si
+from .eval_ps import evaluate_ps
 
-task_names = ['colorizer', 'classifier', 'eval-gen', 'eval-si']
+task_names = ['colorizer', 'classifier', 'eval-gen', 'eval-si', 'eval-ps']
 dataset_names = ['placeholder', 'cifar10', 'places100', 'places205', 'places365']
 dataset_label_counts = {
     'placeholder': 2,
@@ -84,7 +85,6 @@ def main(options):
 
     elif options.task == 'classifier':
 
-
         if options.dataset_name in ['placeholder', 'places100', 'places365']:
             train_loader, val_loader = get_places_loaders(
                 options.dataset_path, options.train_batch_size, options.val_batch_size, options.use_dataset_archive,
@@ -111,14 +111,19 @@ def main(options):
 
     elif options.task == 'eval-si':
         if options.eval_type == 'colorized':
-            dataset_path = os.path.join('./eval', options.model_name)
+            dataset_path = os.path.join(options.eval_root_path, options.model_name)
         else:
-            dataset_path = os.path.join('./eval', options.eval_type)
+            dataset_path = os.path.join(options.eval_root_path, options.eval_type)
 
         test_loader = get_places_test_loader(
             dataset_path, options.val_batch_size, False, for_classification=True)
 
         evaluate_si(gpu_available, options, test_loader)
+
+    elif options.task == 'eval-ps':
+
+        evaluate_ps(gpu_available, options)
+
 
 
 def clean_and_exit(options):

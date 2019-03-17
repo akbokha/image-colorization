@@ -54,7 +54,7 @@ def generate_eval_set(gpu_available, options, test_loader):
     class_idx_to_label = get_idx_to_label(test_loader.dataset)
 
     if options.eval_type == 'original':
-        path = os.path.join('./eval/', options.eval_type, 'test')
+        path = os.path.join(options.eval_root_path, options.eval_type, 'test')
 
         for i, (layers_grayscale, layers_ab, imgs_original, targets) in enumerate(test_loader):
             for j in range(imgs_original.shape[0]):
@@ -63,8 +63,10 @@ def generate_eval_set(gpu_available, options, test_loader):
                 file_name = 'img-{0:04d}.jpg'.format(i * test_loader.batch_size + j)
                 save_image(img_data, path, label, file_name)
 
+            print_progress(i, len(test_loader), options.batch_output_frequency)
+
     elif options.eval_type == 'grayscale':
-        path = os.path.join('./eval/', options.eval_type ,'test')
+        path = os.path.join(options.eval_root_path, options.eval_type ,'test')
 
         for i, (layers_grayscale, layers_ab, imgs_original, targets) in enumerate(test_loader):
             for j in range(layers_grayscale.shape[0]):
@@ -73,8 +75,10 @@ def generate_eval_set(gpu_available, options, test_loader):
                 file_name = 'img-{0:04d}.jpg'.format(i * test_loader.batch_size + j)
                 save_image(img_data, path, label, file_name)
 
+            print_progress(i, len(test_loader), options.batch_output_frequency)
+
     elif options.eval_type == 'colorized':
-        path = os.path.join('./eval/', options.model_name, 'test')
+        path = os.path.join(options.eval_root_path, options.model_name, 'test')
         model = build_colorization_model(gpu_available, options.model_path, options.model_name)
 
         for i, (layers_grayscale, layers_ab, imgs_original, targets) in enumerate(test_loader):
@@ -91,3 +95,10 @@ def generate_eval_set(gpu_available, options, test_loader):
                 label = class_idx_to_label[targets[j].item()]
                 file_name = 'img-{0:04d}.jpg'.format(i * test_loader.batch_size + j)
                 save_image(img_data, path, label, file_name)
+
+            print_progress(i, len(test_loader), options.batch_output_frequency)
+
+
+def print_progress(batch_index, num_batches, output_freq):
+    if batch_index % output_freq == 0:
+        print_ts('[{0}/{1}] Processing images'.format(batch_index + 1, num_batches))
