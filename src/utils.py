@@ -18,12 +18,16 @@ class AverageMeter(object):
         self.avg = 0
         self.sum = 0
         self.count = 0
+        self.sq_sum = 0
 
     def update(self, val, n=1):
         self.val = val
         self.sum += val * n
+        self.sq_sum += (val ** 2) * n
         self.count += n
         self.avg = self.sum / self.count
+        self.var = (self.sq_sum / self.count) - self.avg ** 2
+        self.se = np.sqrt(self.var / self.count)
 
 
 class RateMeter(object):
@@ -38,6 +42,8 @@ class RateMeter(object):
         self.total_successes = 0
         self.trials = 0
         self.total_trials = 0
+        self.avg_rate = 0
+        self.wilson_ci = 0
 
     def update(self, successes, trials):
         self.successes = successes
@@ -46,6 +52,9 @@ class RateMeter(object):
         self.total_trials += trials
         self.rate = self.successes / self.trials
         self.avg_rate = self.total_successes / self.total_trials
+        # https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Wilson_score_interval
+        self.wilson_ci = np.sqrt((self.avg_rate * (1 - self.avg_rate)) / self.total_trials)
+
 
 
 def save_model_state(path, epoch, model, optimizer=None):

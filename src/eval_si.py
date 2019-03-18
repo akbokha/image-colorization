@@ -41,13 +41,18 @@ def evaluate_si(gpu_available, options, test_loader):
         # Print stats -- in the code below, val refers to value, not validation
         if i % options.batch_output_frequency == 0:
             message = '[{0}/{1}]\t' \
-                      'top1_acc {top1_acc.rate:.4f} ({top1_acc.avg_rate:.4f})\t' \
-                      'top5_acc {top5_acc.rate:.4f} ({top5_acc.avg_rate:.4f})'.format(
+                      'top1_acc {top1_acc.rate:.4f} ({top1_acc.avg_rate:.4f})\ttop_1_wci {top1_acc.wilson_ci:.4f}\t' \
+                      'top5_acc {top5_acc.rate:.4f} ({top5_acc.avg_rate:.4f})\ttop_5_wci {top5_acc.wilson_ci:.4f}\t'.format(
                 i + 1, len(test_loader), top1_acc=top1_acc, top5_acc=top5_acc)
             print_ts(message)
 
     output_path = options.experiment_output_path
-    epoch_stats = { 'top1_acc': [top1_acc.avg_rate], 'top5_acc': [top5_acc.avg_rate] }
+    epoch_stats = {
+        'top1_acc': [top1_acc.avg_rate],
+        'top1_wci': [top5_acc.wilson_ci],
+        'top5_acc': [top5_acc.avg_rate],
+        'top5_wci': [top5_acc.wilson_ci]
+    }
     save_stats(output_path, 'si_accuracy.csv', epoch_stats, 1)
 
 

@@ -37,8 +37,8 @@ def evaluate_ps(gpu_available, options):
             distance = model.forward(img_original, img_compare)[0]
             dist_stats.update(distance, 1)
 
-        print_ts('Folder: {0}\t\tavg_dist: {1}'.format(class_dir, dist_stats.avg))
+        print_ts('Folder: {0}\tavg_dist {1:.3f}\tse_dist +/-{2:.3f}'.format(class_dir, dist_stats.avg, dist_stats.se))
 
     output_path = options.experiment_output_path
-    epoch_stats = { 'avg_dist': [dist_stats.avg]}
+    epoch_stats = { 'avg_dist': [dist_stats.avg], 'se_dist': [dist_stats.se]}
     save_stats(output_path, 'ps_accuracy-1.csv', epoch_stats, 1)
