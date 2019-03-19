@@ -47,17 +47,20 @@ def unpickle_cifar10(file):
     return dict[b"data"]
 
 
-def get_224_transforms(augment=False, to_tensor=False, normalise=False):
+def get_224_transforms(resize=True, augment=False, to_tensor=False, normalise=False):
     """
     Get customisable list of transforms for 224 image size
+    :param resize:
     """
+
     transform_list = []
-    if augment:
-        transform_list.append(transforms.RandomSizedCrop(224)),
-        transform_list.append(transforms.RandomHorizontalFlip())
-    else:
-        transform_list.append(transforms.Scale(256)),
-        transform_list.append(transforms.CenterCrop(224))
+    if resize:
+        if augment:
+            transform_list.append(transforms.RandomSizedCrop(224)),
+            transform_list.append(transforms.RandomHorizontalFlip())
+        else:
+            transform_list.append(transforms.Scale(256)),
+            transform_list.append(transforms.CenterCrop(224))
 
     if to_tensor:
         transform_list.append(transforms.ToTensor())
@@ -159,12 +162,12 @@ def get_places205_loaders(dataset_path, train_batch_size, val_batch_size):
         for file in to_be_removed_files:
             os.remove(os.path.join(dataset_path, file))
 
-    train_transforms = get_224_transforms(augment=True, to_tensor=False, normalise=False)
+    train_transforms = get_224_transforms(resize=True, augment=True, to_tensor=False, normalise=False)
     train_imagefolder = GrayscaleImageFolder(train_directory, train_transforms)
     train_loader = torch.utils.data.DataLoader(
         train_imagefolder, batch_size=train_batch_size, shuffle=True, num_workers=1)
 
-    val_transforms = get_224_transforms(augment=False, to_tensor=False, normalise=False)
+    val_transforms = get_224_transforms(resize=True, augment=False, to_tensor=False, normalise=False)
     val_imagefolder = GrayscaleImageFolder(val_directory, val_transforms)
     val_loader = torch.utils.data.DataLoader(
         val_imagefolder, batch_size=val_batch_size, shuffle=False, num_workers=1)
@@ -178,11 +181,11 @@ def get_places_loaders(dataset_path, train_batch_size, val_batch_size, use_datas
     """
 
     if for_classification:
-        train_transforms = get_224_transforms(augment=True, to_tensor=True, normalise=True)
-        val_transforms = get_224_transforms(augment=False, to_tensor=True, normalise=True)
+        train_transforms = get_224_transforms(resize=True, augment=True, to_tensor=True, normalise=True)
+        val_transforms = get_224_transforms(resize=True, augment=False, to_tensor=True, normalise=True)
     else:
-        train_transforms = get_224_transforms(augment=True, to_tensor=False, normalise=False)
-        val_transforms = get_224_transforms(augment=False, to_tensor=False, normalise=False)
+        train_transforms = get_224_transforms(resize=True, augment=True, to_tensor=False, normalise=False)
+        val_transforms = get_224_transforms(resize=True, augment=False, to_tensor=False, normalise=False)
 
     if use_dataset_archive:
         tar_path = dataset_path + '.tar'
@@ -226,9 +229,9 @@ def get_places_test_loader(dataset_path, test_batch_size, use_dataset_archive, f
     """
 
     if for_classification:
-        test_transforms = get_224_transforms(augment=False, to_tensor=True, normalise=True)
+        test_transforms = get_224_transforms(resize=False, augment=False, to_tensor=True, normalise=True)
     else:
-        test_transforms = get_224_transforms(augment=False, to_tensor=False, normalise=False)
+        test_transforms = get_224_transforms(resize=True, augment=False, to_tensor=False, normalise=False)
 
     if use_dataset_archive:
         tar_path = dataset_path + '.tar'
