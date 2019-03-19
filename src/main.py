@@ -1,11 +1,17 @@
 import random
 import sys
+import time
+
+import torch
+import torch.nn as nn
+import torch.optim
 
 from .dataloaders import *
+from .models import *
 from .options import ModelOptions
-from .utils import *
 from .colorizer import train_colorizer
 from .classifier import train_classifier
+from .utils import *
 from .eval_gen import generate_eval_set
 from .eval_si import evaluate_si
 from .eval_ps import evaluate_ps
@@ -18,17 +24,16 @@ dataset_label_counts = {
     'places100': 100,
     'places365': 365
 }
-colorizer_model_names = ['resnet', 'unet32', 'cgan']
-
+colorizer_model_names = ['resnet', 'unet32', 'unet224', 'nazerigan32', 'nazerigan224' 'cgan']
 
 def main(options):
     # initialize random seed
     random.seed(options.seed)
     np.random.seed(options.seed)
     torch.manual_seed(options.seed)
-
-    # Determine if GPU is available
+    
     gpu_available = torch.cuda.is_available()
+    print(gpu_available)
 
     # Create experiment output directory
     if not os.path.exists(options.experiment_output_path):
@@ -139,8 +144,6 @@ def main(options):
             eval_dataset_path, options.val_batch_size, False, resize=False)
 
         evaluate_mse(gpu_available, options, original_loader, eval_loader)
-
-
 
 def clean_and_exit(options):
     os.rmdir(options.experiment_output_path)
