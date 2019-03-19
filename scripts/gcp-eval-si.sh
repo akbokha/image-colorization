@@ -21,6 +21,7 @@ python train.py \
     --task=eval-si \
     --eval-type=colorized \
     --model-name=resnet \
+    --model-suffix=073 \
     --val-batch-size=25 \
     --batch-output-frequency=1 \
 

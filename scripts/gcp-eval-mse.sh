@@ -17,6 +17,7 @@ python train.py \
     --task=eval-mse \
     --eval-type=colorized \
     --model-name=resnet \
+    --model-suffix=073 \
     --dataset-name=places100 \
     --val-batch-size=1 \
     --batch-output-frequency=25 \

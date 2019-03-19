@@ -12,7 +12,7 @@ def evaluate_ps(gpu_available, options):
 
     original_path = os.path.join(options.eval_root_path, 'original/test')
     if options.eval_type == 'colorized':
-        compare_path = os.path.join(options.eval_root_path, options.model_name, 'test')
+        compare_path = os.path.join(options.eval_root_path, options.full_model_name, 'test')
     else:
         compare_path = os.path.join(options.eval_root_path, options.eval_type, 'test')
 

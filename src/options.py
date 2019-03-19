@@ -23,6 +23,7 @@ class ModelOptions:
                             help='Experiment name (default: experiment_001)')
         parser.add_argument('--model-name', type=str, default='resnet',
                             help='Colorization model architecture (default: resnet)')
+        parser.add_argument('--model-suffix', type=str, help='Colorization model name suffix')
         parser.add_argument('--model-path', type=str, default='./models', help='Path for pretrained models')
         parser.add_argument('--dataset-name', type=str, default='placeholder',
                             help='the dataset to use [placeholder, cifar10, places100, places205, places365] (default: placeholder)')
@@ -54,5 +55,10 @@ class ModelOptions:
 
         opt.dataset_path = os.path.join(opt.dataset_root_path, opt.dataset_name)
         opt.experiment_output_path = os.path.join(opt.output_root_path, opt.experiment_name)
+
+        if opt.model_suffix is None:
+            opt.full_model_name = opt.model_name
+        else:
+            opt.full_model_name = '{}-{}'.format(opt.model_name, opt.model_suffix)
 
         return opt

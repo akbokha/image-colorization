@@ -107,17 +107,17 @@ def main(options):
 
         if options.dataset_name in ['placeholder', 'places100']:
             test_loader = get_places_test_loader(
-                options.dataset_path, options.val_batch_size, options.use_dataset_archive)
+                options.dataset_path, options.val_batch_size, options.use_dataset_archive, resize=True)
         else:
             print("{} is not a valid dataset for eval-gen task".format(options.dataset_name))
             clean_and_exit(options)
 
-        generate_eval_set(gpu_available, options, test_loader, False, resize=True)
+        generate_eval_set(gpu_available, options, test_loader)
 
 
     elif options.task == 'eval-si':
         if options.eval_type == 'colorized':
-            dataset_path = os.path.join(options.eval_root_path, options.model_name)
+            dataset_path = os.path.join(options.eval_root_path, options.full_model_name)
         else:
             dataset_path = os.path.join(options.eval_root_path, options.eval_type)
 
@@ -134,7 +134,7 @@ def main(options):
 
         original_dataset_path = os.path.join(options.eval_root_path, 'original')
         if options.eval_type == 'colorized':
-            eval_dataset_path = os.path.join(options.eval_root_path, options.model_name)
+            eval_dataset_path = os.path.join(options.eval_root_path, options.full_model_name)
         else:
             eval_dataset_path = os.path.join(options.eval_root_path, options.eval_type)
 

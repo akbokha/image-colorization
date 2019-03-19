@@ -27,6 +27,7 @@ python train.py \
     --task=eval-gen \
     --eval-type=colorized \
     --model-name=resnet \
+    --model-suffix=073 \
     --dataset-name=places100 \
     --train-batch-size=25 \
     --val-batch-size=25 \

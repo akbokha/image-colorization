@@ -13,6 +13,7 @@ python train.py \
     --task=eval-ps \
     --eval-type=colorized \
     --model-name=resnet \
+    --model-suffix=073 \
     --batch-output-frequency=1 \
 
 # TODO: Add UNet and GAN
