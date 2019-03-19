@@ -3,12 +3,6 @@
 cd ..
 
 python train.py \
-    --experiment-name=eval_ps_original \
-    --task=eval-ps \
-    --eval-type=original \
-    --batch-output-frequency=1 \
-
-python train.py \
     --experiment-name=eval_ps_grayscale \
     --task=eval-ps \
     --eval-type=grayscale \
