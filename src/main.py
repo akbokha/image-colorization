@@ -9,8 +9,9 @@ from .classifier import train_classifier
 from .eval_gen import generate_eval_set
 from .eval_si import evaluate_si
 from .eval_ps import evaluate_ps
+from .eval_mse import evaluate_mse
 
-task_names = ['colorizer', 'classifier', 'eval-gen', 'eval-si', 'eval-ps']
+task_names = ['colorizer', 'classifier', 'eval-gen', 'eval-si', 'eval-ps', 'eval-mse']
 dataset_names = ['placeholder', 'cifar10', 'places100', 'places205', 'places365']
 dataset_label_counts = {
     'placeholder': 2,
@@ -106,7 +107,7 @@ def main(options):
             print("{} is not a valid dataset for eval-gen task".format(options.dataset_name))
             clean_and_exit(options)
 
-        generate_eval_set(gpu_available, options, test_loader)
+        generate_eval_set(gpu_available, options, test_loader, False, resize=True)
 
 
     elif options.task == 'eval-si':
@@ -115,14 +116,29 @@ def main(options):
         else:
             dataset_path = os.path.join(options.eval_root_path, options.eval_type)
 
-        test_loader = get_places_test_loader(
-            dataset_path, options.val_batch_size, False, for_classification=True)
+        eval_loader = get_places_test_loader(
+            dataset_path, options.val_batch_size, False, resize=False, for_classification=True)
 
-        evaluate_si(gpu_available, options, test_loader)
+        evaluate_si(gpu_available, options, eval_loader)
 
     elif options.task == 'eval-ps':
 
         evaluate_ps(gpu_available, options)
+
+    elif options.task == 'eval-mse':
+
+        original_dataset_path = os.path.join(options.eval_root_path, 'original')
+        if options.eval_type == 'colorized':
+            eval_dataset_path = os.path.join(options.eval_root_path, options.model_name)
+        else:
+            eval_dataset_path = os.path.join(options.eval_root_path, options.eval_type)
+
+        original_loader = get_places_test_loader(
+            original_dataset_path, options.val_batch_size, False, resize=False)
+        eval_loader = get_places_test_loader(
+            eval_dataset_path, options.val_batch_size, False, resize=False)
+
+        evaluate_mse(gpu_available, options, original_loader, eval_loader)
 
 
 

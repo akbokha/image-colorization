@@ -223,15 +223,15 @@ def get_places_loaders(dataset_path, train_batch_size, val_batch_size, use_datas
     return train_loader, val_loader
 
 
-def get_places_test_loader(dataset_path, test_batch_size, use_dataset_archive, for_classification=False):
+def get_places_test_loader(dataset_path, test_batch_size, use_dataset_archive, resize=True, for_classification=False):
     """
     Get test dataset loader for one of the Places-based datasets (placeholder, places100, places365)
     """
 
     if for_classification:
-        test_transforms = get_224_transforms(resize=False, augment=False, to_tensor=True, normalise=True)
+        test_transforms = get_224_transforms(resize=resize, augment=False, to_tensor=True, normalise=True)
     else:
-        test_transforms = get_224_transforms(resize=True, augment=False, to_tensor=False, normalise=False)
+        test_transforms = get_224_transforms(resize=resize, augment=False, to_tensor=False, normalise=False)
 
     if use_dataset_archive:
         tar_path = dataset_path + '.tar'
