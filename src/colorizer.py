@@ -56,8 +56,8 @@ def train_colorizer(gpu_available, options, train_loader, val_loader):
         for epoch in range(options.max_epochs):
             train_time, train_loss = train_gan_colorizer_epoch(epoch, train_loader, model, discriminator, criterionBCE, criterionL1, L1, optimizerG, optimizerD, gpu_available, options)
             val_loss = validate_gan_colorizer_epoch(epoch, val_loader, model, discriminator, criterionMSE, True, gpu_available, options)
-            state_epoch_stats(epoch, epoch_stats, train_loss, train_time, val_loss, options)
-            save_model_state(epoch, model, optimizer, options)
+            save_epoch_stats(epoch, epoch_stats, train_time, train_loss, val_loss, options.experiment_output_path)
+            save_model_state(options.experiment_output_path, epoch, model, optimizer)
 
 
 def train_colorizer_epoch(epoch, train_loader, model, criterion, optimizer, gpu_available, options):
@@ -253,7 +253,7 @@ def train_gan_colorizer_epoch(epoch, train_loader, generator, discriminator, cri
         
         # Calculate full loss generator
         loss_generator_BCE = criterionBCE(output_fake[:,0,0,0], real_labels)
-        loss_generator_L1 = criterionL1(output_fake, real_labels) * L1
+        loss_generator_L1 = criterionL1(output_fake[:,0,0,0], real_labels) * L1
         loss_generator = loss_generator_BCE + loss_generator_L1
         loss_generator.backward()
         # Update generator weights
