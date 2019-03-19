@@ -1,14 +1,14 @@
 import os
 import time
-import torch
 from torch import nn, optim
 from torchvision import models
 
 from .utils import *
 
 
-def build_vgg16_model(model_root_path, num_classes):
-    model_path = os.path.join(model_root_path, 'vgg16-397923af.pth')
+def build_vgg16_model(model_path, num_classes):
+    model_path = os.path.join(model_path, 'vgg16-397923af.pth')
+
     vgg16_model = models.vgg16()
     vgg16_model.load_state_dict(torch.load(model_path))
 
@@ -22,9 +22,6 @@ def build_vgg16_model(model_root_path, num_classes):
     features.extend([nn.Linear(num_features, num_classes)])
     vgg16_model.classifier = nn.Sequential(*features)  # Replace the model classifier
 
-    model = models.vgg16(pretrained=False)
-    model.classifier[-1] = nn.Linear(in_features=4096, out_features=num_classes)
-
     return vgg16_model
 
 
@@ -32,13 +29,14 @@ def train_classifier(gpu_available, options, train_loader, val_loader):
 
     model = build_vgg16_model(options.model_path, options.dataset_num_classes)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), lr=0.01, momentum=0.9)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
     # Use GPU if available
     print_ts("Attempt to load model onto GPU.")
     if gpu_available:
-        model = nn.DataParallel(model).cuda()
+        model = model.cuda()
+        criterion = criterion.cuda()
 
     epoch_stats = {
         "epoch": [],
@@ -141,7 +139,7 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
                     'data {data_times.val:.3f} ({data_times.avg:.3f})\t' \
                     'proc {batch_times.val:.3f} ({batch_times.avg:.3f})\t' \
                     'loss {loss_values.val:.4f} ({loss_values.avg:.4f})\t' \
-                    'acc ({acc_rate.rate:.4f})'.format(
+                    'acc {acc_rate.rate:.4f} ({acc_rate.avg_rate:.4f})'.format(
                         epoch, i + 1, len(loader), batch_times=batch_times,
                         data_times=data_times, loss_values=loss_values, acc_rate=acc_rate)
                 print_ts(message)
@@ -150,11 +148,11 @@ def train_val_epoch(epoch, train_loader, val_loader, criterion, model, optimizer
             print('Finished training epoch {}'.format(epoch))
             epoch_train_time = batch_times.sum + data_times.sum
             epoch_train_loss = loss_values.avg
-            epoch_train_acc = acc_rate.rate
+            epoch_train_acc = acc_rate.avg_rate
         else:
             print('Finished validation epoch {}'.format(epoch))
             epoch_val_loss = loss_values.avg
-            epoch_val_acc = acc_rate.rate
+            epoch_val_acc = acc_rate.avg_rate
 
     return epoch_train_time, epoch_train_loss, epoch_train_acc, epoch_val_loss, epoch_val_acc
 

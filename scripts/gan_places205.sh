@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
-#SBATCH --partition=Short
+#SBATCH --partition=LongJobs
 #SBATCH --gres=gpu:4
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-03:59:00
+#SBATCH --time=0-80:00:00
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -34,4 +34,4 @@ export DATASET_DIR=${TMP}/data/
 
 # Activate the relevant virtual environment:
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
-python /home/${STUDENT_ID}/image-colorization/train.py --experiment-name=experiment_001 --model-name=unet32 --dataset-name=cifar10 --train-batch-size=100 --val-batch-size=1000 --batch-output-frequency=10 --max-images=10
+python /home/${STUDENT_ID}/image-colorization/train.py --experiment-name=gan_places205_long_100e --model-name=cgan --dataset-name=places205 --train-batch-size=16 --val-batch-size=16 --batch-output-frequency=10 --max-images=100 --max-epochs=100

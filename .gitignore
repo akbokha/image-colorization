@@ -13,9 +13,11 @@ models
 
 # results
 output
-slurm-*.out
+eval
+slurm-*.out 
 
 # datasets
+data/*.tar
 data/places205/
 data/places365/
 data/places100/
