@@ -41,4 +41,4 @@ def evaluate_ps(gpu_available, options):
 
     output_path = options.experiment_output_path
     epoch_stats = { 'avg_dist': [dist_stats.avg], 'se_dist': [dist_stats.se]}
-    save_stats(output_path, 'ps_accuracy-1.csv', epoch_stats, 1)
+    save_stats(output_path, 'ps_distances.csv', epoch_stats, 1)
