@@ -14,16 +14,22 @@ def get_idx_to_label(dataset):
 def build_colorization_model(gpu_available, model_path, model_name):
     model_state_path = os.path.join(model_path,'{}.pth'.format(model_name))
 
+    if 'cgan' not in model_name:
+        model_state_key = 'model_state'
+    else:
+        model_state_key = 'gen_model_state'
+
     if gpu_available:
         model_state = torch.load(model_state_path)['model_state']
     else:
-        model_state = torch.load(model_state_path, map_location='cpu')['model_state']
+        state_dict = torch.load(model_state_path, map_location='cpu')
+        model_state = torch.load(model_state_path, map_location='cpu')[model_state_key]
 
     if 'resnet' in model_name:
         model = ResNetColorizationNet()
 
-    #elif 'unet224' in model_name:
-    #    model = UNet224()
+    elif 'unet' in model_name:
+        model = UNet224()
 
     elif 'cgan' in model_name:
         model = ConvGenerator()
@@ -96,7 +102,13 @@ def generate_eval_set(gpu_available, options, test_loader):
                 output_ab = model(layers_grayscale)
 
             for j in range(layers_grayscale.shape[0]):
-                img_data = combine_lab_image_layers(layers_grayscale[j], output_ab[j])
+
+                if output_ab.shape[1] == 2: # Non-GAN
+                    img_data = combine_lab_image_layers(layers_grayscale[j], output_ab[j])
+                else: # GAN
+                    img_data = output_ab[j].cpu().numpy().transpose((1, 2, 0))
+                    img_data = (img_data + 1) / 2
+
                 label = class_idx_to_label[targets[j].item()]
                 file_name = 'img-{0:04d}.jpg'.format(i * test_loader.batch_size + j)
                 save_image(img_data, output_path, label, file_name)
