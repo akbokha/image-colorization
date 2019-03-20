@@ -124,7 +124,7 @@ def save_stats(experiment_log_dir, filename, stats_dict, current_epoch, continue
 
 
 def combine_lab_image_layers(grayscale_layer, ab_layers):
-    color_image = torch.cat((grayscale_layer, ab_layers), 0).numpy()  # combine channels
+    color_image = torch.cat((grayscale_layer, ab_layers), 0).cpu().numpy()  # combine channels
     color_image = color_image.transpose((1, 2, 0))  # transpose for matplotlib
     color_image[:, :, 0:1] = color_image[:, :, 0:1] * 100 # rescale for matplotlib
     color_image[:, :, 1:3] = color_image[:, :, 1:3] * 255 - 128
