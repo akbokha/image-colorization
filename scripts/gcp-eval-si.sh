@@ -17,7 +17,7 @@ python train.py \
     --batch-output-frequency=1 \
 
 python train.py \
-    --experiment-name=eval_si_resnet \
+    --experiment-name=eval_si_resnet_quant \
     --task=eval-si \
     --eval-type=colorized \
     --model-name=resnet \
@@ -26,19 +26,46 @@ python train.py \
     --batch-output-frequency=1 \
 
 python train.py \
-    --experiment-name=eval_si_unet \
+    --experiment-name=eval_si_resnet_qual \
     --task=eval-si \
     --eval-type=colorized \
-    --model-name=unet \
-    --model-suffix=059 \
+    --model-name=resnet \
+    --model-suffix=073 \
     --val-batch-size=25 \
     --batch-output-frequency=1 \
 
 python train.py \
-    --experiment-name=eval_si_cgan \
+    --experiment-name=eval_si_unet_quant \
+    --task=eval-si \
+    --eval-type=colorized \
+    --model-name=unet \
+    --model-suffix=087 \
+    --val-batch-size=25 \
+    --batch-output-frequency=1 \
+
+python train.py \
+    --experiment-name=eval_si_unet_qual \
+    --task=eval-si \
+    --eval-type=colorized \
+    --model-name=unet \
+    --model-suffix=078 \
+    --val-batch-size=25 \
+    --batch-output-frequency=1 \
+
+python train.py \
+    --experiment-name=eval_si_cgan_quant \
     --task=eval-si \
     --eval-type=colorized \
     --model-name=cgan \
     --model-suffix=042 \
+    --val-batch-size=25 \
+    --batch-output-frequency=1 \
+
+python train.py \
+    --experiment-name=eval_si_cgan_qual \
+    --task=eval-si \
+    --eval-type=colorized \
+    --model-name=cgan \
+    --model-suffix=028 \
     --val-batch-size=25 \
     --batch-output-frequency=1 \
