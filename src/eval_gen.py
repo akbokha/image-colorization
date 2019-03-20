@@ -20,9 +20,8 @@ def build_colorization_model(gpu_available, model_path, model_name):
         model_state_key = 'gen_model_state'
 
     if gpu_available:
-        model_state = torch.load(model_state_path)['model_state']
+        model_state = torch.load(model_state_path)[model_state_key]
     else:
-        state_dict = torch.load(model_state_path, map_location='cpu')
         model_state = torch.load(model_state_path, map_location='cpu')[model_state_key]
 
     if 'resnet' in model_name:
