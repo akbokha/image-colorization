@@ -21,8 +21,24 @@ python train.py \
     --task=eval-si \
     --eval-type=colorized \
     --model-name=resnet \
-    --model-suffix=073 \
+    --model-suffix=091 \
     --val-batch-size=25 \
     --batch-output-frequency=1 \
 
-# TODO: Add UNet and GAN
+python train.py \
+    --experiment-name=eval_si_unet \
+    --task=eval-si \
+    --eval-type=colorized \
+    --model-name=unet \
+    --model-suffix=059 \
+    --val-batch-size=25 \
+    --batch-output-frequency=1 \
+
+python train.py \
+    --experiment-name=eval_si_cgan \
+    --task=eval-si \
+    --eval-type=colorized \
+    --model-name=cgan \
+    --model-suffix=042 \
+    --val-batch-size=25 \
+    --batch-output-frequency=1 \
