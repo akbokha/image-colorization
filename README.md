@@ -57,10 +57,10 @@ If Conda is used as as package and environment manager, one can use
 `val-batch-size` | validation batch size | `int` | not applicable | `100`
 `batch-output-frequency` | frequency with which to output batch statistics | `int` | not applicable | `1`
 `max-images` | maximum number of images from the validation set to be saved (per epoch) | `int` | not applicable | `10`
-`eval-root-path` | the root path for evaluation images | `str` | not applicable | `'./eval`
+`eval-root-path` | the root path for evaluation images | `str` | not applicable | `'./eval'`
 `eval-type` | the type of evaluation task to perform | `str` | `['original, 'grayscale', 'colorized']` | `'original'`
 
-So one could for example train a cgan colorization on the places365 dataset for 100 epochs by running:
+So one could for example train a cgan colorization model on the places365 dataset for 100 epochs by running:
 ```bash
 python train.py \
   --experiment-name cgan_experiment001 \  
