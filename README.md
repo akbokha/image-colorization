@@ -106,9 +106,18 @@ for image colorization tasks. One of the compelling aspects of using GANs is the
 GANs consist of two networks: a generator and a discriminator. In the context of image colorization the generator’s
 task is to produce colorized images that are indistinguishable from real images. The discriminator’s task is to classify
 whether a sample came from the generator or from the original
-set of images. Traditionally, the generator is represented by a mapping _G(z)_ , where _z_ is a random noise variable which serves as the input of the generator.
-The discriminator is in a similar fashion represented by the mapping _D(x)_ where _x_ represents a real or synthetic input.
+set of images. Traditionally, the generator is represented by a mapping <img src="media/equations/gen_mapping.gif"/> , where _z_ is a random noise variable which serves as the input of the generator.
+The discriminator is in a similar fashion represented by the mapping <img src="media/equations/dis_mapping.gif"/> where _x_ represents a real or synthetic input.
 
 In the context of image colorization, the traditional GAN has to be modified into a [Conditional GAN (CGAN)](https://arxiv.org/abs/1411.1784) such that it takes as image data as input instead of (random) noise. 
 More specifically, the CGAN will take as input greyscale data (i.e. images represented
 by their lightness channel _L_ in the _L\*a\*b\*_ colour space) and generate colorized images. The discriminator will be trained on both the generated colorized images and full-colour ground truth images.
+
+Formally, the main objective of the CGAN can be described by a single mini-max game problem:
+<p align="center">
+ <img src="media/equations/gan_loss_function_minmax.gif"/>
+</p>
+
+Where <img src="media/equations/p_data.gif"/> represents the original image distribution. So informally, the generator tries to minimise the function by generating samples according to a mapping <img src="media/equations/gen_mapping.gif"/> taking as input greyscale images _x_ from the original data while the discriminator tries to maximise the same function by trying to distinguish between real images _y_ from the original data distrbituion and generated samples  <img src="media/equations/gan_samples.gif"/>. 
+
+In addition, the framework facilitates the addition of an L1-regularisation term in order to try to force the generator to produce results that are 'closer’ (i.e. more similar) to images from the original data distribution. Theoretically, this should preserve the structure of the ground-truth images and in addition prevent the generator from prodcuing images where it has given certain pixels or even whole image regions a random colour just to deceive the discriminator. 
