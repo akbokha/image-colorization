@@ -96,4 +96,6 @@ In [Image Colorization with Generative Adversarial Networks](https://arxiv.org/a
 The network implemented in this paper has the same architecture as the one presented in the original U-Net paper, modified to take 224x224 inputs. 
 Non-linearities are introduced by following convolutional and deconvolutional layers with leaky ReLUs with slope of 0.2. Furthermore batch normalisation is applied after every layer.
 
+<img src="/media/unet.png"/>
+
 <b>Conditional GAN (CGAN)</b>
