@@ -74,11 +74,16 @@ python train.py \
 ## Colorization Models
 Three colorization architectures are currently supported in the framework.
 
-<b>ResNet Colorization Network</b> \
+#### ResNet Colorization Network
+
 This architecture consists of a CNN that starts out with a set of convolutional layers which aim to extract low-level and semantic features from the set of input images, inspired by how representations are learned in [Learning Representations for Automatic Colorization](https://arxiv.org/abs/1603.06668?utm_source=top.caibaojian.com/92010).
 Based on the same idea as behind the VGG-16-Gray architecture in this paper, a modified version of the image classification network that is [ResNet-18](https://arxiv.org/abs/1512.03385) is used as a means to learn representations from a set of images. In particular, the network is modified in such a way that it accepts greyscale images and in addition, the network is truncated to six layers.
 This set of layers is used to extract features from the images that are represented by their lightness channels. Subsequently a series of deconvolutional layers is applied to increase the spacial resolution of (i.e. 'upscale') the features. This up-scaling of features learned in a network is inspired by the `upsampling' of features in the colorization network of [Let There Be Color!](http://iizuka.cs.tsukuba.ac.jp/projects/colorization/en/)
 
-<b>U-Net</b>
+#### U-Net
+This network is inspired by [U-Net: Convolutional Networks for Biomedical Image Segmentation](https://arxiv.org/abs/1505.04597) where direct connections are added between contracting and expanding layers of equal size to prevent the loss of spatial context of the original image throughout the layers.
+In [Image Colorization with Generative Adversarial Networks](https://arxiv.org/abs/1803.05400) an approach is proposed that uses such a network for colorization since the preservation of the original greyscale image is of particular importance to this task. 
+The network implemented in this paper has the same architecture as the one presented in the original U-Net paper, modified to take 224x224 inputs. 
+Non-linearities are introduced by following convolutional and deconvolutional layers with leaky ReLUs with slope of 0.2. Furthermore batch normalisation is applied after every layer.
 
 <b>Conditional GAN (CGAN)</b>
