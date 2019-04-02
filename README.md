@@ -71,6 +71,16 @@ python train.py \
   --val-batch-size 16 \
 ```
 
+## Colorization Task
+The task of colorizing a image can be considered a pixel-wise regression problem where the model input _<b>X</b>_ is a _1xHxW_ tensor containing the pixels of the grayscale imageand the model output _<b>Y'</b>_ a tensor of shape _nxHxW_ that represents the predicted colorization information. 
+Specifically, the task aims to discover a mapping _F: <b>X</b> &rarr; <b>Y</b>'_ that plausibly predicts the colorization given the greyscale input.
+
+<img src="/media/ImgPipeline.png"/>
+
+The [CIE _L\*a\*b\*_ colour space](https://en.wikipedia.org/wiki/CIELAB_color_space) lends itself well to this task since the _L_ channel depicts the brightness of the image (_<b>X</b>_ above) and the image colour is fully captured in the remaining _a_ and _b_ channels (_<b>Y'</b>_ above). The _L\*a\*b\*_ colour model also has the advantage of being inspired by human colour perception, meaning that distances in _L\*a\*b\*_
+space can be expected to be correlated with changes in human colour perception. The final output colorized image is
+created by recombining the input L layer with the predicted _a_ and _b_ layers.
+
 ## Colorization Models
 Three colorization architectures are currently supported in the framework.
 
