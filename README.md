@@ -75,7 +75,7 @@ python train.py \
 The task of colorizing a image can be considered a pixel-wise regression problem where the model input _<b>X</b>_ is a _1xHxW_ tensor containing the pixels of the grayscale imageand the model output _<b>Y'</b>_ a tensor of shape _nxHxW_ that represents the predicted colorization information. 
 Specifically, the task aims to discover a mapping _F: <b>X</b> &rarr; <b>Y</b>'_ that plausibly predicts the colorization given the greyscale input.
 
-<img src="/media/ImgPipeline.png"/>
+<img src="/media/img/ImgPipeline.png"/>
 
 The [CIE _L\*a\*b\*_ colour space](https://en.wikipedia.org/wiki/CIELAB_color_space) lends itself well to this task since the _L_ channel depicts the brightness of the image (_<b>X</b>_ above) and the image colour is fully captured in the remaining _a_ and _b_ channels (_<b>Y'</b>_ above). The _L\*a\*b\*_ colour model also has the advantage of being inspired by human colour perception, meaning that distances in _L\*a\*b\*_
 space can be expected to be correlated with changes in human colour perception. The final output colorized image is
@@ -96,6 +96,18 @@ In [Image Colorization with Generative Adversarial Networks](https://arxiv.org/a
 The network implemented in this paper has the same architecture as the one presented in the original U-Net paper, modified to take 224x224 inputs. 
 Non-linearities are introduced by following convolutional and deconvolutional layers with leaky ReLUs with slope of 0.2. Furthermore batch normalisation is applied after every layer.
 
-<img src="/media/unet.png"/>
+<img src="/media/img/unet.png"/>
 
-<b>Conditional GAN (CGAN)</b>
+#### Conditional GAN (CGAN)
+Recent research on image colorization has demonstrated the potential for using GAN architectures
+for image colorization tasks. One of the compelling aspects of using GANs is their ability to learn a loss function that is task-specific.
+
+GANs consist of two networks: a generator and a discriminator. In the context of image colorization the generator’s
+task is to produce colorized images that are indistinguishable from real images. The discriminator’s task is to classify
+whether a sample came from the generator or from the original
+set of images. Traditionally, the generator is represented by a mapping _G(z)_ , where _z_ is a random noise variable which serves as the input of the generator.
+The discriminator is in a similar fashion represented by the mapping _D(x)_ where _x_ represents a real or synthetic input.
+
+In the context of image colorization, the traditional GAN has to be modified into a [Conditional GAN (CGAN)](https://arxiv.org/abs/1411.1784) such that it takes as image data as input instead of (random) noise. 
+More specifically, the CGAN will take as input greyscale data (i.e. images represented
+by their lightness channel _L_ in the _L\*a\*b\*_ colour space) and generate colorized images. The discriminator will be trained on both the generated colorized images and full-colour ground truth images.
