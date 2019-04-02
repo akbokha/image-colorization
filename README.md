@@ -93,10 +93,11 @@ This set of layers is used to extract features from the images that are represen
 #### U-Net
 This network is inspired by [U-Net: Convolutional Networks for Biomedical Image Segmentation](https://arxiv.org/abs/1505.04597) where direct connections are added between contracting and expanding layers of equal size to prevent the loss of spatial context of the original image throughout the layers.
 In [Image Colorization with Generative Adversarial Networks](https://arxiv.org/abs/1803.05400) an approach is proposed that uses such a network for colorization since the preservation of the original greyscale image is of particular importance to this task. 
-The network implemented in this paper has the same architecture as the one presented in the original U-Net paper, modified to take 224x224 inputs. 
-Non-linearities are introduced by following convolutional and deconvolutional layers with leaky ReLUs with slope of 0.2. Furthermore batch normalisation is applied after every layer.
 
 <img src="/media/img/unet.png"/>
+
+The network implemented in this paper has the same architecture as the one presented in the original U-Net paper (see image above), modified to take 224x224 inputs. 
+Non-linearities are introduced by following convolutional and deconvolutional layers with leaky ReLUs with slope of 0.2. Furthermore batch normalisation is applied after every layer.
 
 #### Conditional GAN (CGAN)
 Recent research on image colorization has demonstrated the potential for using GAN architectures
