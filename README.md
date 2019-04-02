@@ -70,3 +70,15 @@ python train.py \
   --train-batch-size 16 \
   --val-batch-size 16 \
 ```
+
+## Colorization Models
+Three colorization architectures are currently supported in the framework.
+
+<b>ResNet Colorization Network</b> \
+This architecture consists of a CNN that starts out with a set of convolutional layers which aim to extract low-level and semantic features from the set of input images, inspired by how representations are learned in [Learning Representations for Automatic Colorization](https://arxiv.org/abs/1603.06668?utm_source=top.caibaojian.com/92010).
+Based on the same idea as behind the VGG-16-Gray architecture in this paper, a modified version of the image classification network that is [ResNet-18](https://arxiv.org/abs/1512.03385) is used as a means to learn representations from a set of images. In particular, the network is modified in such a way that it accepts greyscale images and in addition, the network is truncated to six layers.
+This set of layers is used to extract features from the images that are represented by their lightness channels. Subsequently a series of deconvolutional layers is applied to increase the spacial resolution of (i.e. 'upscale') the features. This up-scaling of features learned in a network is inspired by the `upsampling' of features in the colorization network of [Let There Be Color!](http://iizuka.cs.tsukuba.ac.jp/projects/colorization/en/)
+
+<b>U-Net</b>
+
+<b>Conditional GAN (CGAN)</b>
